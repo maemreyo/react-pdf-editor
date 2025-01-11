@@ -55,7 +55,7 @@ export const useQRCode = (
   const handleDrag = useCallback(
     (
       e: React.MouseEvent,
-      canvasRect: DOMRect,
+      containerRect: DOMRect,
       canvasWidth: number,
       canvasHeight: number,
     ) => {
@@ -64,14 +64,22 @@ export const useQRCode = (
       const deltaX = e.clientX - dragStartPos.current.x;
       const deltaY = e.clientY - dragStartPos.current.y;
 
+      // Calculate scale factors
+      const scaleX = canvasWidth / containerRect.width;
+      const scaleY = canvasHeight / containerRect.height;
+
+      // Adjust deltas based on scale factors
+      const adjustedDeltaX = deltaX * scaleX;
+      const adjustedDeltaY = deltaY * scaleY;
+
       // Calculate new position considering the QR size and document boundaries
       const displayQRSize = Math.max(
         (qrPosition.size * qrPosition.dpi) / 96,
         5,
       );
       const validPosition = calculateValidQRPosition(
-        initialQRPos.current.x + deltaX,
-        initialQRPos.current.y + deltaY,
+        initialQRPos.current.x + adjustedDeltaX,
+        initialQRPos.current.y + adjustedDeltaY,
         displayQRSize,
         { width: canvasWidth, height: canvasHeight },
       );
