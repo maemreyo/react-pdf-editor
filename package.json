@@ -128,7 +128,8 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "qrcode": "^1.5.4",
-    "react-hook-form": "^7.54.2"
+    "react-hook-form": "^7.54.2",
+    "sass": "^1.83.1"
   },
   "peerDependencies": {
     "react": "^16.8 || ^17 || ^18 || ^19",

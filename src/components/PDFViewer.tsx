@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-import { PDFViewerProps, PDFSource } from "@/types";
-import { StaticQRCodeGenerator } from "@strategies/QRCodeStrategies";
-import { usePDFLoader } from "@hooks/usePDFLoader";
-import { useViewerMode } from "@hooks/useViewerMode";
-import { useQRCode } from "@/hooks/useQRCode";
-import { PDFToolbar } from "@components/PDFToolbar";
-import { PDFCanvas } from "@components/PDFCanvas";
-import { QRCodeCanvas } from "@components/QRCodeCanvas";
-import { mergeQRCodeWithPDF, downloadPDF, downloadBlob } from "@/utils";
 import * as pdfjsLib from "pdfjs-dist";
-import "./styles.scss";
-import { DEFAULT_VIEWER_CONFIG } from "@/constants";
+import { PDFViewerProps, PDFSource } from "@/types";
+import { StaticQRCodeGenerator } from "../strategies/QRCodeStrategies";
+import { usePDFLoader } from "../hooks/usePDFLoader";
+import { useViewerMode } from "../hooks/useViewerMode";
+import { useQRCode } from "../hooks/useQRCode";
+import { PDFToolbar } from "./PDFToolbar";
+import { PDFCanvas } from "./PDFCanvas";
+import { QRCodeCanvas } from "./QRCodeCanvas";
+import { mergeQRCodeWithPDF, downloadPDF, downloadBlob } from "../utils";
+import { DEFAULT_VIEWER_CONFIG } from "../constants";
+import "../styles.scss";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.mjs`;
 
@@ -177,14 +177,14 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = ({
     // Sử dụng chiến lược tạo QR Code
     let qrCodeBase64: string;
     const defaultQRStrategy = new StaticQRCodeGenerator(
-      qrCodeImage || "/images/qr-code.png",
+      qrCodeImage || "/images/qr-code.png"
     ); // Default to static if not provided
     const strategy = qrCodeGeneratorStrategy || defaultQRStrategy;
 
     if (qrCodeGeneratorStrategy) {
       qrCodeBase64 = await strategy.generate(
         qrLink || "https://example.com",
-        qrPosition,
+        qrPosition
       ); // Use qrLink if available
     } else {
       qrCodeBase64 = await defaultQRStrategy.generate("", qrPosition);
@@ -195,7 +195,7 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = ({
       qrCodeBase64,
       qrPosition,
       outputFileName,
-      mergeOutputType,
+      mergeOutputType
     );
 
     if (mergedPdf) {
@@ -272,7 +272,7 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = ({
                     e,
                     containerRef.current?.getBoundingClientRect() as DOMRect,
                     canvasSize.width,
-                    canvasSize.height,
+                    canvasSize.height
                   )
                 }
                 onDragEnd={handleDragEnd}
