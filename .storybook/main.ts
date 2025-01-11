@@ -1,15 +1,12 @@
-import type { StorybookConfig } from "@storybook/react-webpack5";
-
-const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
+// .storybook/main.js
+module.exports = {
+  stories: ["../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
+    "@storybook/addon-onboarding",
     "@storybook/addon-interactions",
-    "@storybook/addon-a11y",
-    // "storybook-addon-designs",
     "storybook-dark-mode",
-    "@storybook/addon-mdx-gfm",
   ],
   framework: {
     name: "@storybook/react-webpack5",
@@ -17,23 +14,45 @@ const config: StorybookConfig = {
   },
   docs: {
     autodocs: "tag",
-    defaultName: "Documentation",
   },
   webpackFinal: async (config) => {
-    config.module?.rules?.push({
+    // TS rule
+    config.module.rules.push({
       test: /\.(ts|tsx)$/,
+      exclude: /node_modules/,
       use: [
         {
-          loader: require.resolve("ts-loader"),
+          loader: require.resolve("babel-loader"),
           options: {
-            transpileOnly: true,
+            presets: [
+              "@babel/preset-env",
+              "@babel/preset-react",
+              "@babel/preset-typescript",
+            ],
+            // Disable loading babel-plugin-styled-components
+            plugins: [],
           },
         },
       ],
     });
-    config.resolve?.extensions?.push(".ts", ".tsx");
+    config.resolve.extensions.push(".ts", ".tsx");
+
+    // SCSS Modules rule
+    config.module.rules.push({
+      test: /\.module\.scss$/,
+      use: [
+        "style-loader",
+        {
+          loader: "css-loader",
+          options: {
+            modules: {
+              localIdentName: "[name]__[local]___[hash:base64:5]",
+            },
+          },
+        },
+        "sass-loader",
+      ],
+    });
     return config;
   },
 };
-
-export default config;

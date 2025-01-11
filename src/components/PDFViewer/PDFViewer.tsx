@@ -1,16 +1,17 @@
+// src/components/PDFViewer/PDFViewer.tsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { PDFViewerProps, PDFSource } from "@/types";
-import { StaticQRCodeGenerator } from "../strategies/QRCodeStrategies";
-import { usePDFLoader } from "../hooks/usePDFLoader";
-import { useViewerMode } from "../hooks/useViewerMode";
-import { useQRCode } from "../hooks/useQRCode";
-import { PDFToolbar } from "./PDFToolbar";
-import { PDFCanvas } from "./PDFCanvas";
-import { QRCodeCanvas } from "./QRCodeCanvas";
-import { mergeQRCodeWithPDF, downloadPDF, downloadBlob } from "../utils";
-import { DEFAULT_VIEWER_CONFIG } from "../constants";
-import "../styles.scss";
+import { StaticQRCodeGenerator } from "../../strategies/QRCodeStrategies";
+import { usePDFLoader } from "../../hooks/usePDFLoader";
+import { useViewerMode } from "../../hooks/useViewerMode";
+import { useQRCode } from "../../hooks/useQRCode";
+import { PDFToolbar } from "../PDFToolbar/PDFToolbar";
+import { PDFCanvas } from "../PDFCanvas/PDFCanvas";
+import { QRCodeCanvas } from "../QRCodeCanvas/QRCodeCanvas";
+import { mergeQRCodeWithPDF, downloadPDF, downloadBlob } from "../../utils";
+import { DEFAULT_VIEWER_CONFIG } from "../../constants";
+import styles from "./PDFViewer.module.scss";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.mjs`;
 
@@ -218,7 +219,7 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = ({
   }, [qrCodeGeneratorStrategy, enableQRCode]);
 
   return (
-    <div ref={containerRef} className="pdf-viewer position-relative w-100">
+    <div ref={containerRef} className={styles.pdfViewer}>
       <PDFToolbar
         viewMode={viewMode}
         showQRCode={showQRCode}
@@ -239,17 +240,17 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = ({
       />
 
       <div
-        className="canvas-container overflow-auto d-flex justify-content-center align-items-center"
+        className={styles.pdfViewer__canvasContainer}
         style={{
           height: DEFAULT_VIEWER_CONFIG.DEFAULT_VIEWER_HEIGHT,
         }}
       >
         {isLoading ? (
-          <div className="spinner-border text-primary" role="status">
+          <div className={styles.pdfViewer__spinner} role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
         ) : error ? (
-          <div className="alert alert-danger">
+          <div className={styles.pdfViewer__errorAlert}>
             Error loading PDF: {error.message}
           </div>
         ) : (

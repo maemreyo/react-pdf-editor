@@ -1,5 +1,7 @@
+// src/components/PDFToolbar/PDFToolbar.tsx
 import React from "react";
-import { ViewerMode } from "../types";
+import { ViewerMode } from "../../types";
+import styles from "./PDFToolbar.module.scss";
 
 interface PDFToolbarProps {
   viewMode: ViewerMode;
@@ -41,19 +43,19 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
   const minZoomPercent = Math.round(minZoom * 100);
   const maxZoomPercent = Math.round(maxZoom * 100);
   return (
-    <div className="pdf-toolbar position-sticky top-0 start-0 w-100 bg-light shadow p-2 d-flex justify-content-between align-items-center">
-      <div className="btn-group">
+    <div className={styles.pdfToolbar}>
+      <div className={styles.pdfToolbar__buttonGroup}>
         <button
-          className="btn btn-sm btn-outline-primary rounded-start me-0"
+          className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__roundedStart}`}
           onClick={onZoomIn}
           disabled={showQRCode}
         >
           <i className="fa fa-search-plus"></i>
         </button>
-        <div className="input-group" style={{ width: "80px" }}>
+        <div className={styles.pdfToolbar__inputGroup}>
           <input
             type="number"
-            className="form-control form-control-sm text-center"
+            className={styles.pdfToolbar__inputGroup_input}
             value={zoomInput}
             onChange={(e) => handleZoomInputChange(e.target.value)}
             min={minZoomPercent}
@@ -62,7 +64,7 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
           />
         </div>
         <button
-          className="btn btn-sm btn-outline-primary rounded-end me-0"
+          className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__roundedEnd}`}
           onClick={onZoomOut}
           disabled={showQRCode}
         >
@@ -70,7 +72,7 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
         </button>
 
         <button
-          className="btn btn-sm btn-outline-primary ms-2"
+          className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__marginLeft}`}
           onClick={onRotate}
           disabled={showQRCode}
         >
@@ -78,7 +80,7 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
         </button>
         {viewMode.isModified && (
           <button
-            className="btn btn-sm btn-outline-secondary ms-2"
+            className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__marginLeft}`}
             onClick={onResetView}
             disabled={showQRCode}
             title="Reset View"
@@ -88,7 +90,7 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
         )}
       </div>
 
-      <div className="d-flex align-items-center gap-3">
+      <div className={styles.pdfToolbar__switchGroup}>
         <div className="form-check form-switch">
           <input
             className="form-check-input"
@@ -104,9 +106,9 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
           </label>
         </div>
 
-        <div className="d-flex align-items-center">
+        <div className={styles.pdfToolbar__pageInfo}>
           <button
-            className="btn btn-sm btn-outline-primary me-2"
+            className={styles.pdfToolbar__button}
             onClick={() => onPageChange(-1)}
             disabled={viewMode.pageNumber <= 1}
           >
@@ -116,7 +118,7 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
             Page {viewMode.pageNumber} of {viewMode.totalPages}
           </span>
           <button
-            className="btn btn-sm btn-outline-primary ms-2"
+            className={styles.pdfToolbar__button}
             onClick={() => onPageChange(1)}
             disabled={viewMode.pageNumber >= viewMode.totalPages}
           >
@@ -125,23 +127,25 @@ export const PDFToolbar: React.FC<PDFToolbarProps> = ({
         </div>
       </div>
 
-      <div className="d-flex gap-2">
+      <div className={styles.pdfToolbar__buttonGroup}>
         {enableDownload && (
           <button
-            className="btn btn-sm btn-primary"
+            className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__primary}`}
             onClick={onDownload}
             disabled={showQRCode}
           >
-            <i className="fa fa-download me-1"></i>
+            <i
+              className={`${styles.pdfToolbar__button__icon} fa fa-download`}
+            ></i>
             Download
           </button>
         )}
         <button
-          className="btn btn-sm btn-primary"
+          className={`${styles.pdfToolbar__button} ${styles.pdfToolbar__button__primary}`}
           onClick={onDownloadWithQR}
           disabled={!showQRCode}
         >
-          <i className="fa fa-qrcode me-1"></i>
+          <i className={`${styles.pdfToolbar__button__icon} fa fa-qrcode`}></i>
           Download with QR
         </button>
       </div>

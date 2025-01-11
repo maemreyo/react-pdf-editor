@@ -4,6 +4,7 @@ import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import dts from "rollup-plugin-dts";
+import postcss from "rollup-plugin-postcss";
 
 const packageJson = require("./package.json");
 
@@ -27,6 +28,14 @@ export default [
       resolve(),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
+      // Add postcss plugin
+      postcss({
+        plugins: [],
+        extract: true, // Extract CSS to separate file
+        modules: true, // Enable CSS Modules
+        use: ["sass"], // Use Sass preprocessor
+        sourceMap: true,
+      }),
       terser(),
     ],
     external: ["react", "react-dom"],

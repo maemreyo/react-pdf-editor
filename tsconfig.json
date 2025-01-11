@@ -1,14 +1,4 @@
 {
-  "include": ["src", "types", ".storybook"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "lib",
-    "build",
-    "coverage",
-    "storybook-static",
-    ".vscode/"
-  ],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
@@ -38,6 +28,21 @@
       "@types/*": ["./src/types/*"],
       "@utils/*": ["./src/utils/*"],
       "@constants/*": ["./src/constants.ts"]
-    },
-  }
+    }
+  },
+  "include": [
+    "src",
+    "src/custom.d.ts",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib",
+    "build",
+    "coverage",
+    "storybook-static",
+    ".vscode/"
+  ]
 }

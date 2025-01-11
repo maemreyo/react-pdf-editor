@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import PDFViewer from "./PDFViewer";
-import { PDFUploadButton } from "./PDFUpload";
+import PDFViewer from "./PDFViewer/PDFViewer";
+import { PDFUploadButton } from "./PDFUpload/PDFUpload";
 import { PDFViewerProps } from "@/types";
 
 const meta: Meta<typeof PDFViewer> = {

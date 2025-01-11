@@ -1,3 +1,4 @@
+// eslint.config.mjs
 import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -27,6 +28,7 @@ export default [
     )
   ),
   {
+    files: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
     plugins: {
       react: fixupPluginRules(react),
       "react-hooks": fixupPluginRules(reactHooks),
@@ -35,13 +37,11 @@ export default [
     },
     languageOptions: {
       parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: "script",
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
-        project: "./tsconfig.json",
+        project: ["./tsconfig.json"],
       },
     },
     settings: {
@@ -58,6 +58,15 @@ export default [
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-unsafe-function-type": "off",
       "react/no-children-prop": "off",
+      // Disable specific rules for .stories.tsx files
+      "react/prop-types": "off",
+      "@typescript-eslint/no-empty-function": "off",
+    },
+  },
+  {
+    files: ["**/*.stories.tsx"],
+    rules: {
+      "react/prop-types": "off", // Disable react/prop-types for stories files
     },
   },
 ];

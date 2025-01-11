@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from "react";
-import { ViewerMode } from "../types";
+import { ViewerMode } from "../../types";
+import styles from "./PDFCanvas.module.scss";
 
 interface PDFCanvasProps {
   pdf: any;
@@ -68,15 +69,5 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
     };
   }, [renderPage, viewMode.pageNumber, viewMode.zoom, viewMode.rotation]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="pdf-canvas"
-      style={{
-        width: "100%",
-        display: "block",
-        transition: "0.3s ease-in-out",
-      }}
-    />
-  );
+  return <canvas ref={canvasRef} className={styles.pdfCanvas} />;
 };

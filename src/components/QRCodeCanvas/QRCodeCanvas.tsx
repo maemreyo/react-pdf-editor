@@ -1,6 +1,9 @@
+// src/components/QRCodeCanvas/QRCodeCanvas.tsx
 import React, { useRef, useEffect } from "react";
-import { QRCodePosition } from "../types";
-import { calculateValidQRPosition } from "../utils";
+import { QRCodePosition } from "../../types";
+import { calculateValidQRPosition } from "../../utils";
+import styles from "./QRCodeCanvas.module.scss";
+
 interface QRCodeCanvasProps {
   qrPosition: QRCodePosition;
   qrCodeImage: string;
@@ -38,7 +41,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
       qrPosition.x,
       qrPosition.y,
       displayQRSize,
-      { width, height },
+      { width, height }
     );
 
     return new Promise<void>((resolve) => {
@@ -52,7 +55,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
               validPosition.x,
               validPosition.y,
               displayQRSize,
-              displayQRSize,
+              displayQRSize
             );
           }
           resolve();
@@ -63,7 +66,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
           validPosition.x,
           validPosition.y,
           displayQRSize,
-          displayQRSize,
+          displayQRSize
         );
         resolve();
       }
@@ -81,21 +84,11 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
   return (
     <canvas
       ref={canvasRef}
-      className="qr-canvas"
+      className={styles.qrCanvas}
       onMouseDown={onDragStart}
       onMouseMove={onDrag}
       onMouseUp={onDragEnd}
       onMouseLeave={onDragEnd}
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: "100%",
-        height: "100%",
-        cursor: "grab",
-        userSelect: "none", // Prevent text selection while dragging
-        touchAction: "none", // Prevent scrolling while dragging on touch devices
-      }}
     />
   );
 };
