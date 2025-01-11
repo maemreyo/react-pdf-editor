@@ -57,6 +57,14 @@ export const useViewerMode = (
     [onViewModeChange, validateZoom],
   );
 
+  const handlePageChange = useCallback(
+    (delta: number) => {
+      // Update pageNumber through updateViewMode
+      updateViewMode({ pageNumber: viewMode.pageNumber + delta });
+    },
+    [viewMode.pageNumber, updateViewMode],
+  );
+
   const zoomIn = useCallback(() => {
     updateViewMode({
       zoom: validateZoom(viewMode.zoom + DEFAULT_VIEWER_CONFIG.ZOOM_STEP),
@@ -109,5 +117,6 @@ export const useViewerMode = (
     handleZoomInputChange,
     minZoom,
     maxZoom,
+    handlePageChange,
   };
 };

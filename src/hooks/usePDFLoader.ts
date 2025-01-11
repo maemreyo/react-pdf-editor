@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { getPdfUrlFromBlob } from "../utils";
-import { PDFSource } from "../types";
+import { PDFSource, ViewerMode } from "../types";
 
-export const usePDFLoader = (initialSource: string | Blob | ArrayBuffer) => {
+export const usePDFLoader = (
+  initialSource: string | Blob | ArrayBuffer,
+  updateViewMode: (updates: Partial<ViewerMode>) => void,
+) => {
   const [pdf, setPdf] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -35,7 +38,6 @@ export const usePDFLoader = (initialSource: string | Blob | ArrayBuffer) => {
 
     processSource();
   }, [initialSource]);
-
   // Load PDF khi pdfSource đã được xử lý
   useEffect(() => {
     const loadPDF = async () => {
@@ -61,6 +63,9 @@ export const usePDFLoader = (initialSource: string | Blob | ArrayBuffer) => {
         const loadingTask = pdfjsLib.getDocument(urlToLoad);
         const pdfDoc = await loadingTask.promise;
         setPdf(pdfDoc);
+
+        // Update totalPages after PDF is loaded
+        updateViewMode({ totalPages: pdfDoc.numPages });
       } catch (err) {
         setError(err as Error);
         console.error("Error loading PDF:", err);
@@ -80,7 +85,7 @@ export const usePDFLoader = (initialSource: string | Blob | ArrayBuffer) => {
         blobUrlRef.current = null;
       }
     };
-  }, [pdfSource]);
+  }, [pdfSource, updateViewMode]);
 
   return { pdf, pdfSource, isLoading, error, renderTaskRef };
 };

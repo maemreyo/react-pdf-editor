@@ -42,9 +42,6 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
-  const { pdf, pdfSource, isLoading, error, renderTaskRef } =
-    usePDFLoader(source);
-
   const {
     viewMode,
     updateViewMode,
@@ -57,6 +54,11 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     minZoom,
     maxZoom,
   } = useViewerMode(onViewModeChange, initialZoom, dMinzoom, dMaxzoom);
+
+  const { pdf, pdfSource, isLoading, error, renderTaskRef } = usePDFLoader(
+    source,
+    updateViewMode,
+  );
 
   const {
     qrPosition,
