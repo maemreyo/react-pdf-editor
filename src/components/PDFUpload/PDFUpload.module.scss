@@ -9,11 +9,11 @@
   border: 2px dashed #ced4da;
   border-radius: 0.25rem;
 
-  &--dragging {
+  &__dragging {
     border-color: #0d6efd;
   }
 
-  &--disabled {
+  &__disabled {
     background-color: #f8f9fa;
     opacity: 0.75;
   }
@@ -39,7 +39,7 @@
 }
 
 .button {
-  &--primary {
+  &__primary {
     background-color: #0d6efd;
     color: white;
     border: none;
@@ -57,7 +57,7 @@
     }
   }
 
-  &--secondary {
+  &__secondary {
     background-color: #6c757d;
     color: white;
     border: none;

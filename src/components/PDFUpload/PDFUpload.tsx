@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import styles from "./PDFUpload.module.scss";
 
+console.log("PDFUpload", styles);
+
 // Types
 interface PDFUploadButtonProps {
   onFilesSelected: (files: File[]) => void;
@@ -51,13 +53,12 @@ export const PDFUploadButton: React.FC<PDFUploadButtonProps> = ({
     if (disabled || loading) return;
     fileInputRef.current?.click();
   };
-
   if (variant === "zone") {
     return (
       <div
         className={`${styles.dropZone} ${
-          isDragging ? styles.dropZone__dragging : ""
-        } ${disabled ? styles.dropZone__disabled : ""} ${className}`}
+          isDragging ? styles["dropZone--dragging"] : ""
+        } ${disabled ? styles["dropZone--disabled"] : ""} ${className}`}
         onDrop={handleDrop}
         onDragOver={(e) => {
           e.preventDefault();
@@ -70,7 +71,7 @@ export const PDFUploadButton: React.FC<PDFUploadButtonProps> = ({
           type="file"
           accept={accept}
           onChange={handleFileInput}
-          className="d-none"
+          style={{ display: "none" }}
           disabled={disabled || loading}
         />
 
@@ -80,7 +81,7 @@ export const PDFUploadButton: React.FC<PDFUploadButtonProps> = ({
           </div>
         ) : (
           <>
-            <i className={`${styles.uploadIcon} bi bi-cloud-upload`}></i>
+            <i className={styles.uploadIcon}></i>
             <div className={styles.uploadText}>
               {children || (
                 <>
@@ -99,33 +100,24 @@ export const PDFUploadButton: React.FC<PDFUploadButtonProps> = ({
     );
   }
 
-  // Button variant
   return (
     <>
       <button
         type="button"
-        className={`${styles.button} ${
-          disabled ? styles.button__secondary : styles.button__primary
-        } ${loading ? styles.button__disabled : ""} ${className}`}
+        className={`${disabled ? styles["button--secondary"] : styles["button--primary"]} ${className}`}
         onClick={handleButtonClick}
         disabled={disabled || loading}
       >
         {loading ? (
           <>
-            <span
-              className={`${styles.spinner} ${styles.spinner__small}`}
-              role="status"
-              aria-hidden="true"
-            ></span>
+            <span className={styles.spinner} role="status" aria-hidden="true" />
             Loading...
           </>
         ) : (
-          children || (
-            <>
-              <i className={`${styles.button__icon} bi bi-upload`}></i>
-              Upload PDF
-            </>
-          )
+          <>
+            <i className={styles.button__icon}></i>
+            Upload PDF
+          </>
         )}
       </button>
       <input
@@ -133,7 +125,7 @@ export const PDFUploadButton: React.FC<PDFUploadButtonProps> = ({
         type="file"
         accept={accept}
         onChange={handleFileInput}
-        className="d-none"
+        style={{ display: "none" }}
         disabled={disabled || loading}
       />
     </>

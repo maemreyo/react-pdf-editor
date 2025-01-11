@@ -52,7 +52,7 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
       if (onRender) {
         onRender();
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error?.name !== "RenderingCancelledException") {
         console.error("Error rendering page:", error);
       }

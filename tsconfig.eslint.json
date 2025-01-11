@@ -1,4 +1,8 @@
+// Filepath: /tsconfig.eslint.json
 {
   "extends": "./tsconfig.json",
-  "include": ["src", "src/custom.d.ts", ".storybook", "eslint.config.mjs"]
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["src", ".storybook", "vite.config.ts", "eslint.config.mjs"]
 }

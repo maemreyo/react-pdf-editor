@@ -1,4 +1,3 @@
-// eslint.config.mjs
 import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -29,6 +28,23 @@ export default [
   ),
   {
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/.husky/**",
+      "**/.idea/**",
+      "**/.vscode/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/storybook-static/**",
+      "!/.storybook", // Ensure .storybook is not ignored
+      "!/vite.config.ts", // Ensure vite.config.ts is not ignored
+      "!/eslint.config.mjs", // Ensure eslint.config.mjs is not ignored
+      "!.storybook", // Ensure .storybook is not ignored
+      "!vite.config.ts", // Ensure vite.config.ts is not ignored
+      "!eslint.config.mjs", // Ensure eslint.config.mjs is not ignored
+      "/*.*", // Ignore all files at root level except specific mentioned above
+    ],
     plugins: {
       react: fixupPluginRules(react),
       "react-hooks": fixupPluginRules(reactHooks),
@@ -41,7 +57,7 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: ["./tsconfig.json"],
+        project: ["./tsconfig.eslint.json"], // Use the new tsconfig.eslint.json
       },
     },
     settings: {
@@ -55,12 +71,9 @@ export default [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-object-type": "off",
       "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off",
-      "react/no-children-prop": "off",
-      // Disable specific rules for .stories.tsx files
-      "react/prop-types": "off",
       "@typescript-eslint/no-empty-function": "off",
+      "react/prop-types": "off", // Disable react/prop-types as we are using TypeScript
+      "react/react-in-jsx-scope": "off", // Disable this as React 17+ no longer needs this
     },
   },
   {

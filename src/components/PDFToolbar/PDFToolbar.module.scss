@@ -32,7 +32,7 @@
       opacity: 0.5;
       cursor: default;
     }
-    &--primary{
+    &__primary{
       background-color: #0d6efd;
       color: white;
       border-color: #0d6efd;
@@ -42,20 +42,20 @@
       }
     }
 
-    &--icon {
+    &__icon {
       margin-right: 0.25rem;
     }
-    &--roundedStart {
+    &__roundedStart {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
 
-    &--roundedEnd {
+    &__roundedEnd {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
 
-    &--marginLeft {
+    &__marginLeft {
       margin-left: 0.5rem;
     }
   }

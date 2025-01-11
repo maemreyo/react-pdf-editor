@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import PDFViewer from "./PDFViewer/PDFViewer";
+import PDFViewerComponent from "./PDFViewer/PDFViewer"; // Import PDFViewer as PDFViewerComponent
 import { PDFUploadButton } from "./PDFUpload/PDFUpload";
-import { PDFViewerProps } from "@/types";
+import { PDFViewerProps } from "@/types"; // Import PDFViewerProps
 
-const meta: Meta<typeof PDFViewer> = {
-  title: "Components/PDFViewer",
-  component: PDFViewer,
+const meta: Meta<typeof PDFViewerComponent> = {
+  title: "Components/PDFControlStory", // Updated title
+  component: PDFViewerComponent, // Use PDFViewerComponent
   // Add controls for boolean props
   argTypes: {
-    source: {
-      control: { type: "text" },
-      description:
-        "The source of the PDF file. Can be a URL, base64 string, Blob, or ArrayBuffer. Leave empty to enable upload from local.",
-    },
     outputFileName: {
       control: { type: "text" },
       defaultValue: "document.pdf",
@@ -30,7 +25,7 @@ const meta: Meta<typeof PDFViewer> = {
       control: { type: "text" },
       defaultValue: "/images/qr-code.png",
     },
-    qrCodeLink: {
+    qrLink: {
       control: { type: "text" },
       defaultValue: "https://example.com",
     },
@@ -69,9 +64,10 @@ const meta: Meta<typeof PDFViewer> = {
 
 export default meta;
 
-const Template: StoryFn<typeof PDFViewer> = (args) => {
+const PDFControlStoryTemplate: StoryFn<typeof PDFViewerComponent> = (args) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  // Handle file selection
   const handleFileSelected = (files: File[]) => {
     if (files.length > 0) {
       setUploadedFile(files[0]);
@@ -79,19 +75,41 @@ const Template: StoryFn<typeof PDFViewer> = (args) => {
   };
 
   return (
-    <>
-      {(!args.source || !uploadedFile) && (
-        <PDFUploadButton onFilesSelected={handleFileSelected} className="mb-3">
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      {/* Display PDFUploadButton if no file is uploaded */}
+      {!uploadedFile ? (
+        <PDFUploadButton onFilesSelected={handleFileSelected} variant="zone">
           Upload PDF
         </PDFUploadButton>
+      ) : null}
+
+      {/* Display PDFViewer if a file is uploaded */}
+      {uploadedFile && (
+        <PDFViewerComponent
+          {...args}
+          source={uploadedFile} // Pass the uploaded file as source
+        />
       )}
-      <PDFViewer {...args} source={uploadedFile ? uploadedFile : args.source} />
-    </>
+    </div>
   );
 };
 
-export const Default = Template.bind({});
-// More on args: https://storybook.js.org/docs/react/writing-stories/args
-Default.args = {
-  source: "",
-} as PDFViewerProps;
+export const PDFControlStory = PDFControlStoryTemplate.bind({});
+
+// Default arguments for PDFControlStory
+PDFControlStory.args = {
+  enableDownload: true,
+  enableQRCode: true,
+  qrLink: "https://example.com",
+  outputFileName: "output.pdf",
+  qrCodeImage: "/images/qr-code.png",
+  defaultQRSize: 20,
+  initialZoom: 1,
+  minZoom: 0.5,
+  maxZoom: 3,
+} as Partial<PDFViewerProps>;

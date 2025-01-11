@@ -1,4 +1,3 @@
-// src/components/QRCodeCanvas/QRCodeCanvas.tsx
 import React, { useRef, useEffect } from "react";
 import { QRCodePosition } from "../../types";
 import { calculateValidQRPosition } from "../../utils";
@@ -41,7 +40,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
       qrPosition.x,
       qrPosition.y,
       displayQRSize,
-      { width, height }
+      { width, height },
     );
 
     return new Promise<void>((resolve) => {
@@ -55,7 +54,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
               validPosition.x,
               validPosition.y,
               displayQRSize,
-              displayQRSize
+              displayQRSize,
             );
           }
           resolve();
@@ -66,7 +65,7 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
           validPosition.x,
           validPosition.y,
           displayQRSize,
-          displayQRSize
+          displayQRSize,
         );
         resolve();
       }

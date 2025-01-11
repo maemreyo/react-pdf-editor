@@ -3,22 +3,19 @@
     "module": "esnext",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
-    "declaration": true,
     "sourceMap": true,
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
-    "emitDeclarationOnly": false,
-    "noEmit": false,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
@@ -30,12 +27,7 @@
       "@constants/*": ["./src/constants.ts"]
     }
   },
-  "include": [
-    "src",
-    "src/custom.d.ts",
-    ".storybook/**/*.ts",
-    ".storybook/**/*.tsx"
-  ],
+  "include": ["src", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
   "exclude": [
     "node_modules",
     "dist",
