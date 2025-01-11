@@ -1,5 +1,14 @@
 {
-  "include": ["src", "types"],
+  "include": ["src", "types", ".storybook"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib",
+    "build",
+    "coverage",
+    "storybook-static",
+    ".vscode/"
+  ],
   "compilerOptions": {
     "module": "esnext",
     "lib": ["dom", "esnext"],
@@ -24,8 +33,11 @@
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
-      "@types/*": ["./types/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@providers/*": ["./src/providers/*"],
+      "@strategies/*": ["./src/strategies/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@constants/*": ["./src/constants.ts"]
     },
   }
 }
