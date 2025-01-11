@@ -23,7 +23,7 @@ const meta: Meta<typeof PDFViewerComponent> = {
     },
     qrCodeImage: {
       control: { type: "text" },
-      defaultValue: "/images/qr-code.png",
+      qrCodeImage: "https://placehold.co/150x150/png", // Default: Online URL
     },
     qrLink: {
       control: { type: "text" },
@@ -107,7 +107,6 @@ PDFControlStory.args = {
   enableQRCode: true,
   qrLink: "https://example.com",
   outputFileName: "output.pdf",
-  qrCodeImage: "/images/qr-code.png",
   defaultQRSize: 20,
   initialZoom: 1,
   minZoom: 0.5,

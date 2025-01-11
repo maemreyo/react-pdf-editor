@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from "react";
+// File/src/components/QRCodeCanvas/QRCodeCanvas.tsx
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { QRCodePosition } from "../../types";
 import { calculateValidQRPosition } from "../../utils";
 import styles from "./QRCodeCanvas.module.scss";
@@ -24,8 +25,10 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
-  const renderQRCode = async () => {
+  const renderQRCode = useCallback(async () => {
     if (!canvasRef.current || !qrCodeImage) return;
 
     const context = canvasRef.current.getContext("2d");
@@ -44,10 +47,17 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
     );
 
     return new Promise<void>((resolve) => {
-      if (!imageRef.current) {
-        imageRef.current = new Image();
-        imageRef.current.src = qrCodeImage;
-        imageRef.current.onload = () => {
+      if (!imageRef.current || imageRef.current.src !== qrCodeImage) {
+        setImageLoading(true);
+        setImageError(null);
+
+        const newImage = new Image();
+        newImage.crossOrigin = "anonymous"; // Important for external URLs
+        newImage.src = qrCodeImage;
+
+        newImage.onload = () => {
+          imageRef.current = newImage;
+          setImageLoading(false);
           if (imageRef.current) {
             context.drawImage(
               imageRef.current,
@@ -59,7 +69,14 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
           }
           resolve();
         };
-      } else {
+
+        newImage.onerror = () => {
+          setImageLoading(false);
+          setImageError("Error loading QR Code image");
+          console.error("Error loading QR Code image:", qrCodeImage);
+          resolve();
+        };
+      } else if (!imageLoading && !imageError && imageRef.current) {
         context.drawImage(
           imageRef.current,
           validPosition.x,
@@ -68,9 +85,11 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
           displayQRSize,
         );
         resolve();
+      } else {
+        resolve();
       }
     });
-  };
+  }, [qrPosition, qrCodeImage, width, height, imageLoading, imageError]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -78,16 +97,22 @@ export const QRCodeCanvas: React.FC<QRCodeCanvasProps> = ({
       canvasRef.current.height = height;
       renderQRCode();
     }
-  }, [qrPosition, qrCodeImage, width, height]);
+  }, [renderQRCode, width, height]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={styles.qrCanvas}
-      onMouseDown={onDragStart}
-      onMouseMove={onDrag}
-      onMouseUp={onDragEnd}
-      onMouseLeave={onDragEnd}
-    />
+    <div className={styles.qrCanvasContainer}>
+      <canvas
+        ref={canvasRef}
+        className={styles.qrCanvas}
+        onMouseDown={onDragStart}
+        onMouseMove={onDrag}
+        onMouseUp={onDragEnd}
+        onMouseLeave={onDragEnd}
+      />
+      {imageLoading && (
+        <div className={styles.loadingIndicator}>Loading QR Code...</div>
+      )}
+      {imageError && <div className={styles.errorIndicator}>{imageError}</div>}
+    </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from "react";
 import * as pdfjsLib from "pdfjs-dist";
-import { PDFViewerProps, PDFSource } from "@/types";
+import { PDFViewerProps } from "@/types";
 import { StaticQRCodeGenerator } from "../../strategies/QRCodeStrategies";
 import { usePDFLoader } from "../../hooks/usePDFLoader";
 import { useViewerMode } from "../../hooks/useViewerMode";
@@ -17,8 +17,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 import { useMemo } from "react";
 import { useDebugRender } from "../../hooks/useDebugRender";
 
-const AdvancedPDFViewer: React.FC<PDFViewerProps> = (props) => {
-  useDebugRender("AdvancedPDFViewer", props);
+const PDFViewer: React.FC<PDFViewerProps> = (props) => {
+  useDebugRender("PDFViewer", props);
 
   const {
     source,
@@ -26,7 +26,7 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = (props) => {
     enableDownload = true,
     enableQRCode = true,
     qrLink = "https://example.com",
-    qrCodeImage = "/images/qr-code.png",
+    qrCodeImage = "https://placehold.co/150x150/png",
     defaultQRSize = DEFAULT_VIEWER_CONFIG.DEFAULT_QR_SIZE,
     initialZoom = 1,
     minZoom: dMinzoom = DEFAULT_VIEWER_CONFIG.MIN_ZOOM,
@@ -246,4 +246,4 @@ const AdvancedPDFViewer: React.FC<PDFViewerProps> = (props) => {
   );
 };
 
-export default React.memo(AdvancedPDFViewer);
+export default React.memo(PDFViewer);
