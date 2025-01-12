@@ -16,15 +16,17 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
+    "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@providers/*": ["./src/providers/*"],
-      "@strategies/*": ["./src/strategies/*"],
-      "@types/*": ["./src/types/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@constants/*": ["./src/constants.ts"]
+      "plugins/*": ["plugins/*"],
+      "components/*": ["components/*"],
+      "hooks/*": ["hooks/*"],
+      "providers/*": ["providers/*"],
+      "strategies/*": ["strategies/*"],
+      "types/*": ["types/*"],
+      "utils/*": ["utils/*"],
+      "constants/*": ["constants.ts"]
     }
   },
   "include": ["src", ".storybook/**/*.ts", ".storybook/**/*.tsx"],

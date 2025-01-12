@@ -159,6 +159,13 @@ export type FactoryOptions = {
 // ============================= Plugin interfaces =============================
 // =============================================================================
 
+// Add new types for plugin types
+export type PluginType = "behavior" | "validation" | "rendering" | "utility";
+export type BehaviorPluginType = "behavior";
+export type ValidationPluginType = "validation";
+export type RenderingPluginType = "rendering";
+export type UtilityPluginType = "utility";
+
 /**
  * Interface cho plugin system.
  */
@@ -186,13 +193,14 @@ export interface IContentPlugin {
  */
 interface IPlugin extends IContentPlugin {
   name: string;
+  type: PluginType;
 }
 
 /**
  * Plugin for custom validation rules.
  */
 export interface IValidationPlugin extends IPlugin {
-  type: "validation";
+  type: ValidationPluginType;
   validator: IContentValidation;
 }
 
@@ -200,7 +208,7 @@ export interface IValidationPlugin extends IPlugin {
  * Plugin for custom rendering logic.
  */
 export interface IRenderingPlugin extends IPlugin {
-  type: "rendering";
+  type: RenderingPluginType;
   renderStrategy: IRenderStrategy;
 }
 
@@ -208,7 +216,7 @@ export interface IRenderingPlugin extends IPlugin {
  * Plugin for custom element behaviors.
  */
 export interface IBehaviorPlugin extends IPlugin {
-  type: "behavior";
+  type: BehaviorPluginType;
   stateManagementStrategy?: IStateManagementStrategy;
   // Add other behavior-related strategies as needed
 }
@@ -217,6 +225,6 @@ export interface IBehaviorPlugin extends IPlugin {
  * Plugin for helper functions.
  */
 export interface IUtilityPlugin extends IPlugin {
-  type: "utility";
+  type: UtilityPluginType;
   // Define utility methods as needed
 }

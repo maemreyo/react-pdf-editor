@@ -9,10 +9,7 @@ import {
   FactoryOptions,
   ValidationError,
   IContentPlugin,
-  IValidationPlugin,
-  IRenderingPlugin,
-  IBehaviorPlugin,
-} from "../types/_factory";
+} from "@/types/_factory";
 import { ImageElement, TextElement, QRCodeElement } from "./ContentElements";
 
 import {
@@ -20,7 +17,7 @@ import {
   DefaultLoadingStrategy,
   DefaultErrorHandlingStrategy,
   DefaultStateManagementStrategy,
-} from "../strategies/DefaultStrategies";
+} from "@/strategies/DefaultStrategies";
 
 // Default implementation for IContentValidation
 export class DefaultContentValidation implements IContentValidation {
@@ -179,7 +176,7 @@ export class ContentFactory implements IContentElementFactory {
     this.registry = registry;
     this.validator = validator;
     this.config = config;
-    this.pluginRegistry = new PluginRegistry(this); // Pass 'this' to PluginRegistry
+    this.pluginRegistry = new PluginRegistry(this);
 
     // Register default factories
     this.registry.registerFactory(ContentType.IMAGE, new ImageElementFactory());
