@@ -1,18 +1,44 @@
-// File: src/components/ContentElements/ImageElement.ts
 import { ContentElement, ContentData } from "../../types/_content";
 import { getBase64FromImageUrl } from "../../utils";
+import {
+  IRenderStrategy,
+  ILoadingStrategy,
+  IErrorHandlingStrategy,
+  IStateManagementStrategy,
+} from "../../types/_strategies";
+import {
+  DefaultRenderStrategy,
+  DefaultLoadingStrategy,
+  DefaultErrorHandlingStrategy,
+  DefaultStateManagementStrategy,
+} from "../../strategies/DefaultStrategies";
+import { ContentType } from "@/types";
 
 export class ImageElement implements ContentElement {
   readonly id: string;
-  readonly type: ContentData["type"] = "image";
+  readonly type: ContentType = ContentType.IMAGE;
   private data: ContentData;
   private image: HTMLImageElement | null = null;
   private loading: boolean = false;
   private error: string | null = null;
+  private renderStrategy: IRenderStrategy;
+  private loadingStrategy: ILoadingStrategy;
+  private errorHandlingStrategy: IErrorHandlingStrategy;
+  private stateManagementStrategy: IStateManagementStrategy;
 
-  constructor(data: ContentData) {
+  constructor(
+    data: ContentData,
+    renderStrategy: IRenderStrategy = new DefaultRenderStrategy(),
+    loadingStrategy: ILoadingStrategy = new DefaultLoadingStrategy(),
+    errorHandlingStrategy: IErrorHandlingStrategy = new DefaultErrorHandlingStrategy(),
+    stateManagementStrategy: IStateManagementStrategy = new DefaultStateManagementStrategy(),
+  ) {
     this.id = data.id;
     this.data = data;
+    this.renderStrategy = renderStrategy;
+    this.loadingStrategy = loadingStrategy;
+    this.errorHandlingStrategy = errorHandlingStrategy;
+    this.stateManagementStrategy = stateManagementStrategy;
     this.loadImage();
   }
 
@@ -26,10 +52,7 @@ export class ImageElement implements ContentElement {
     this.error = null;
 
     try {
-      // Convert the image URL to a base64 string
       const base64Image = await getBase64FromImageUrl(this.data.src);
-
-      // Create a new image element and set its source to the base64 string
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = base64Image;
@@ -54,35 +77,36 @@ export class ImageElement implements ContentElement {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    if (!this.image) {
-      if (this.loading) {
-        // Handle loading state, e.g., draw a loading indicator
-        ctx.save();
-        ctx.fillStyle = "lightgray";
-        ctx.fillRect(this.data.x, this.data.y, 100, 100); // Placeholder size
-        ctx.restore();
-      }
-      if (this.error) {
-        // Handle error state, e.g., draw an error icon
-        ctx.save();
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.data.x, this.data.y, 100, 100); // Placeholder size
-        ctx.restore();
-      }
-      return; // Cannot render without image
+    if (this.loading) {
+      this.loadingStrategy.handleLoading(this, ctx, canvasWidth, canvasHeight);
+      return;
     }
 
-    ctx.drawImage(this.image, this.data.x, this.data.y);
+    if (this.error) {
+      this.errorHandlingStrategy.handleError(
+        this,
+        ctx,
+        canvasWidth,
+        canvasHeight,
+        this.error,
+      );
+      return;
+    }
+
+    if (this.image) {
+      // Delegate rendering to the render strategy
+      await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+    }
   }
 
   update(data: Partial<ContentData>): void {
-    this.data = { ...this.data, ...data };
+    this.stateManagementStrategy.setState(this, data);
     if (data.src && data.src !== this.data.src) {
       this.loadImage();
     }
   }
 
   getData(): ContentData {
-    return this.data;
+    return this.stateManagementStrategy.getState(this);
   }
 }

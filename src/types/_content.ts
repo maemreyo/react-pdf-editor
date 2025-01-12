@@ -1,6 +1,8 @@
+import { ContentType } from "./_factory";
+
 // Định nghĩa interface cho dữ liệu đầu vào của các Content Element
 export interface ContentData {
-  type: "image" | "text" | "qrcode";
+  type: ContentType;
   id: string; // ID duy nhất cho mỗi element
   // Các thuộc tính chung, có thể mở rộng thêm tùy theo loại nội dung
   x: number;

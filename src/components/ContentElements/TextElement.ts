@@ -1,34 +1,56 @@
 import { ContentElement, ContentData } from "../../types/_content";
+import {
+  IRenderStrategy,
+  ILoadingStrategy,
+  IErrorHandlingStrategy,
+  IStateManagementStrategy,
+} from "../../types/_strategies";
+import {
+  DefaultRenderStrategy,
+  DefaultLoadingStrategy,
+  DefaultErrorHandlingStrategy,
+  DefaultStateManagementStrategy,
+} from "../../strategies/DefaultStrategies";
+import { ContentType } from "@/types";
 
 export class TextElement implements ContentElement {
   readonly id: string;
-  readonly type: ContentData["type"] = "text";
+  readonly type: ContentType = ContentType.TEXT;
   private data: ContentData;
+  private renderStrategy: IRenderStrategy;
+  private loadingStrategy: ILoadingStrategy;
+  private errorHandlingStrategy: IErrorHandlingStrategy;
+  private stateManagementStrategy: IStateManagementStrategy;
 
-  constructor(data: ContentData) {
+  constructor(
+    data: ContentData,
+    renderStrategy: IRenderStrategy = new DefaultRenderStrategy(),
+    loadingStrategy: ILoadingStrategy = new DefaultLoadingStrategy(),
+    errorHandlingStrategy: IErrorHandlingStrategy = new DefaultErrorHandlingStrategy(),
+    stateManagementStrategy: IStateManagementStrategy = new DefaultStateManagementStrategy(),
+  ) {
     this.id = data.id;
     this.data = data;
+    this.renderStrategy = renderStrategy;
+    this.loadingStrategy = loadingStrategy;
+    this.errorHandlingStrategy = errorHandlingStrategy;
+    this.stateManagementStrategy = stateManagementStrategy;
   }
 
   async render(
     ctx: CanvasRenderingContext2D,
-    _canvasWidth: number,
-    _canvasHeight: number,
+    canvasWidth: number,
+    canvasHeight: number,
   ): Promise<void> {
-    if (!this.data.value) return;
-
-    ctx.save();
-    ctx.fillStyle = "black"; // Default color, make configurable later
-    ctx.font = "16px Arial"; // Default font, make configurable later
-    ctx.fillText(this.data.value, this.data.x, this.data.y);
-    ctx.restore();
+    // Delegate rendering to the render strategy
+    await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
   }
 
   update(data: Partial<ContentData>): void {
-    this.data = { ...this.data, ...data };
+    this.stateManagementStrategy.setState(this, data);
   }
 
   getData(): ContentData {
-    return this.data;
+    return this.stateManagementStrategy.getState(this);
   }
 }

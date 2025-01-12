@@ -4,18 +4,45 @@ import {
   DynamicQRCodeGenerator,
 } from "../../strategies";
 import { DEFAULT_VIEWER_CONFIG } from "../../constants";
+import {
+  IRenderStrategy,
+  ILoadingStrategy,
+  IErrorHandlingStrategy,
+  IStateManagementStrategy,
+} from "../../types/_strategies";
+import {
+  DefaultRenderStrategy,
+  DefaultLoadingStrategy,
+  DefaultErrorHandlingStrategy,
+  DefaultStateManagementStrategy,
+} from "../../strategies/DefaultStrategies";
+import { ContentType } from "@/types";
 
 export class QRCodeElement implements ContentElement {
   readonly id: string;
-  readonly type: ContentData["type"] = "qrcode";
+  readonly type: ContentType = ContentType.QRCODE;
   private data: ContentData;
   private qrCodeImage: string | null = null;
   private loading: boolean = false;
   private error: string | null = null;
+  private renderStrategy: IRenderStrategy;
+  private loadingStrategy: ILoadingStrategy;
+  private errorHandlingStrategy: IErrorHandlingStrategy;
+  private stateManagementStrategy: IStateManagementStrategy;
 
-  constructor(data: ContentData) {
+  constructor(
+    data: ContentData,
+    renderStrategy: IRenderStrategy = new DefaultRenderStrategy(),
+    loadingStrategy: ILoadingStrategy = new DefaultLoadingStrategy(),
+    errorHandlingStrategy: IErrorHandlingStrategy = new DefaultErrorHandlingStrategy(),
+    stateManagementStrategy: IStateManagementStrategy = new DefaultStateManagementStrategy(),
+  ) {
     this.id = data.id;
     this.data = data;
+    this.renderStrategy = renderStrategy;
+    this.loadingStrategy = loadingStrategy;
+    this.errorHandlingStrategy = errorHandlingStrategy;
+    this.stateManagementStrategy = stateManagementStrategy;
     this.generateQRCode();
   }
 
@@ -50,46 +77,29 @@ export class QRCodeElement implements ContentElement {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    if (!this.qrCodeImage) {
-      if (this.loading) {
-        // Handle loading state
-        ctx.save();
-        ctx.fillStyle = "lightgray";
-        ctx.fillRect(this.data.x, this.data.y, 50, 50); // Placeholder size
-        ctx.restore();
-      }
-      if (this.error) {
-        // Handle error state
-        ctx.save();
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.data.x, this.data.y, 50, 50); // Placeholder size
-        ctx.restore();
-      }
-      return; // Cannot render without QR code image
+    if (this.loading) {
+      this.loadingStrategy.handleLoading(this, ctx, canvasWidth, canvasHeight);
+      return;
     }
 
-    return new Promise<void>((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = this.qrCodeImage!;
-
-      img.onload = () => {
-        const size = this.data.size || DEFAULT_VIEWER_CONFIG.DEFAULT_QR_SIZE;
-        const dpi = this.data.dpi || DEFAULT_VIEWER_CONFIG.DEFAULT_DPI;
-        const displaySize = Math.max((size * dpi) / 96, 5);
-        ctx.drawImage(img, this.data.x, this.data.y, displaySize, displaySize);
-        resolve();
-      };
-
-      img.onerror = () => {
-        this.error = "Error loading QR Code image";
-        reject(new Error(this.error));
-      };
-    });
+    if (this.error) {
+      this.errorHandlingStrategy.handleError(
+        this,
+        ctx,
+        canvasWidth,
+        canvasHeight,
+        this.error,
+      );
+      return;
+    }
+    if (this.qrCodeImage) {
+      // Delegate rendering to the render strategy
+      await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+    }
   }
 
   update(data: Partial<ContentData>): void {
-    this.data = { ...this.data, ...data };
+    this.stateManagementStrategy.setState(this, data);
     if (
       (data.link && data.link !== this.data.link) ||
       (data.src && data.src !== this.data.src)
@@ -99,6 +109,6 @@ export class QRCodeElement implements ContentElement {
   }
 
   getData(): ContentData {
-    return this.data;
+    return this.stateManagementStrategy.getState(this);
   }
 }

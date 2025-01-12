@@ -5,7 +5,7 @@ import {
   ContentData,
   ContentFactory as IContentFactory,
 } from "../types/_content";
-import { ContentFactory } from "./ContentFactory";
+import { ContentFactory as NewContentFactory } from "./ContentFactory";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -14,7 +14,7 @@ interface ContentManagerProps {
 }
 
 export const ContentManager: React.FC<ContentManagerProps> = ({
-  contentFactory = new ContentFactory(),
+  contentFactory = new NewContentFactory(), // Use the new ContentFactory
   initialContent = [],
   onChange,
 }) => {
