@@ -1,4 +1,3 @@
-// File: src/components/PDFViewer/PDFViewer.tsx
 import React, { useRef, useState, useCallback } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { PDFViewerProps } from "@/types";
@@ -18,9 +17,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 
 import { useMemo } from "react";
 
-import { ContentManager } from "../ContentManager";
+import { ContentManager, ContentManagerRef } from "../ContentManager";
 import { ContentToolbar } from "../ContentToolbar";
 import { ContentData } from "../../types/_content";
+import {
+  ContentFactory,
+  DefaultContentConfiguration,
+  DefaultContentValidation,
+} from "../ContentFactory";
+import { ContentFactoryRegistry } from "@/types";
+import { DIContainer } from "@/core/di/Container";
 
 const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   const {
@@ -46,7 +52,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   // Memoize complex objects and functions
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const contentManagerRef = useRef<HTMLDivElement | null>(null);
+  const contentManagerRef = useRef<ContentManagerRef | null>(null);
   // Add content data state
   const [contentData, setContentData] = useState<ContentData[]>([]);
 
@@ -87,7 +93,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
         });
       }
     }
-  }, []);
+  }, [containerRef]);
 
   const handlePageChange = useCallback(
     (delta: number) => {
@@ -103,7 +109,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     if (!viewMode.isModified) {
       setShowQRCode((prev) => !prev);
     }
-  }, [viewMode.isModified]);
+  }, [viewMode.isModified, setShowQRCode]);
 
   // Memoize download handlers
   const handleDownload = useCallback(() => {
@@ -210,7 +216,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   const handleContentChange = useCallback(
     (content: ContentData[]) => {
       setContentData(content);
-      onContentChange?.(content); // Call onContentChange prop
+      onContentChange?.(content);
     },
     [onContentChange],
   );
@@ -221,21 +227,30 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
       canvasWidth: number,
       canvasHeight: number,
     ) => {
-      if (contentManagerRef.current) {
-        const renderContentFunc =
-          contentManagerRef.current.dataset.renderContentFunc;
-        if (renderContentFunc) {
-          // @ts-ignore
-          await contentManagerRef.current[renderContentFunc](
-            ctx,
-            canvasWidth,
-            canvasHeight,
-          );
-        }
+      if (contentManagerRef.current?.renderContent) {
+        await contentManagerRef.current.renderContent(
+          ctx,
+          canvasWidth,
+          canvasHeight,
+        );
       }
     },
     [contentManagerRef],
   );
+
+  // Initialize ContentFactory
+  const contentFactory = useMemo(() => {
+    console.log("Initializing ContentFactory");
+    const diContainer = DIContainer.getInstance();
+    const registry = new ContentFactoryRegistry();
+    const validation = new DefaultContentValidation();
+    const configuration = new DefaultContentConfiguration();
+    const factory = new ContentFactory(registry, validation, configuration);
+
+    return factory;
+  }, []);
+
+  console.log("contentFactory in PDFViewer:", contentFactory);
 
   return (
     <div ref={containerRef} className={styles.pdfViewer}>
@@ -259,6 +274,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
             <div className="position-relative">
               <ContentManager
                 ref={contentManagerRef}
+                contentFactory={contentFactory}
                 initialContent={initialContent}
                 onChange={handleContentChange}
               />

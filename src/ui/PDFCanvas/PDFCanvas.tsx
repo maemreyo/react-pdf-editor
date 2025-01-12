@@ -57,7 +57,7 @@ export const PDFCanvas: React.FC<PDFCanvasProps> = ({
         console.error("Error rendering page:", error);
       }
     }
-  }, [pdf, viewMode, renderTaskRef, onRender]);
+  }, [pdf, viewMode, renderTaskRef]);
 
   useEffect(() => {
     renderPage();

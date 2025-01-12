@@ -1,9 +1,9 @@
-// File: src/components/ContentToolbar.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { ContentData } from "../types/_content";
+import { ContentManagerRef } from "./ContentManager";
 
 interface ContentToolbarProps {
-  contentManagerRef: React.RefObject<HTMLDivElement | null>;
+  contentManagerRef: React.RefObject<ContentManagerRef | null>;
 }
 
 export const ContentToolbar: React.FC<ContentToolbarProps> = ({
@@ -13,17 +13,9 @@ export const ContentToolbar: React.FC<ContentToolbarProps> = ({
     ContentData["type"] | null
   >(null);
 
-  const addContent = (data: ContentData) => {
-    if (contentManagerRef?.current) {
-      const addContentFunc = contentManagerRef.current.dataset.addContent;
-      if (addContentFunc) {
-        // @ts-ignore
-        contentManagerRef.current[addContentFunc](data);
-      }
-    }
-  };
-
   const handleAddContent = () => {
+    console.log("handleAddContent called");
+    console.log("contentManagerRef.current:", contentManagerRef.current);
     if (!selectedContentType) return;
 
     const id = Date.now().toString(); // Simple unique ID generator
@@ -34,29 +26,33 @@ export const ContentToolbar: React.FC<ContentToolbarProps> = ({
     };
 
     switch (selectedContentType) {
-      case "image":
-        addContent({
+      case "image": {
+        console.log("Adding image...");
+        contentManagerRef.current?.addContent({
           ...baseContentData,
           type: "image",
           src: "https://placehold.co/150x150/png", // Default image
         } as ContentData);
         break;
-      case "text":
-        addContent({
+      }
+      case "text": {
+        console.log("Adding text...");
+        contentManagerRef.current?.addContent({
           ...baseContentData,
           type: "text",
           value: "New Text", // Default text
         } as ContentData);
         break;
-      case "qrcode":
-        addContent({
+      }
+      case "qrcode": {
+        console.log("Adding qrcode...");
+        contentManagerRef.current?.addContent({
           ...baseContentData,
           type: "qrcode",
           link: "https://example.com", // Default link
-          size: 20,
-          dpi: 300,
         } as ContentData);
         break;
+      }
       default:
         break;
     }
