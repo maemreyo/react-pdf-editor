@@ -5,7 +5,12 @@ import {
   ContentData,
   ContentFactory as IContentFactory,
 } from "../types/_content";
-import { ContentFactory as NewContentFactory } from "./ContentFactory";
+import {
+  ContentFactory,
+  DefaultContentConfiguration,
+  DefaultContentValidation,
+} from "./ContentFactory";
+import { ContentFactoryRegistry } from "@/types";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -14,7 +19,11 @@ interface ContentManagerProps {
 }
 
 export const ContentManager: React.FC<ContentManagerProps> = ({
-  contentFactory = new NewContentFactory(), // Use the new ContentFactory
+  contentFactory = new ContentFactory(
+    new ContentFactoryRegistry(),
+    new DefaultContentValidation(),
+    new DefaultContentConfiguration(),
+  ),
   initialContent = [],
   onChange,
 }) => {

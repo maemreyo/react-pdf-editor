@@ -21,10 +21,6 @@ export class DefaultRenderStrategy implements IRenderStrategy {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    console.warn(
-      "DefaultRenderStrategy is being used, you might want to implement a specific render strategy for this content type.",
-    );
-    // Placeholder implementation, specific logic will be handled by individual ContentElements
     if (element.type === "text") {
       const data = element.getData();
       if (!data.value) return;
@@ -36,14 +32,17 @@ export class DefaultRenderStrategy implements IRenderStrategy {
       ctx.restore();
     } else if (element.type === "image") {
       const data = element.getData();
-      const image = await this.loadImage(data.src!);
+      if (!data.src) return;
+      const image = await this.loadImage(data.src);
+
       if (image) {
         ctx.drawImage(image, data.x, data.y);
       }
     } else if (element.type === "qrcode") {
       const data = element.getData();
+      if (!data.link) return;
       const qrCodeImage = await this.loadQRCodeImage(
-        data.link!,
+        data.link,
         data.src,
         data.x,
         data.y,
@@ -56,6 +55,10 @@ export class DefaultRenderStrategy implements IRenderStrategy {
         const displaySize = Math.max((size * dpi) / 96, 5);
         ctx.drawImage(qrCodeImage, data.x, data.y, displaySize, displaySize);
       }
+    } else {
+      console.warn(
+        "DefaultRenderStrategy is being used, you might want to implement a specific render strategy for this content type.",
+      );
     }
   }
 

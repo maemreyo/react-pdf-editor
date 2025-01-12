@@ -236,7 +236,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
         }
       }
     },
-    [],
+    [contentManagerRef],
   );
 
   return (

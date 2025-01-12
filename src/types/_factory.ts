@@ -37,6 +37,7 @@ export interface IContentConfiguration {
   /**
    * Cập nhật option cấu hình cho factory.
    * @param options - Các option cấu hình mới.
+   * @throws {ConfigurationError} Nếu có lỗi xảy ra trong quá trình configuration.
    */
   setOptions(options: FactoryOptions): void;
 }
@@ -151,7 +152,6 @@ export interface IContentValidation {
 export type FactoryOptions = {
   validate?: boolean; // Có thực hiện validate hay không, mặc định là true
   validationRules?: { [key in ContentType]?: ValidationRules }; // Validation rules cho từng loại content
-  validators?: { [key: string]: IContentValidation }; // Custom validators
   plugins?: IContentPlugin[]; // Plugins to be registered
 };
 

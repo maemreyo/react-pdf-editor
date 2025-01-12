@@ -23,7 +23,7 @@ import {
 } from "../strategies/DefaultStrategies";
 
 // Default implementation for IContentValidation
-class DefaultContentValidation implements IContentValidation {
+export class DefaultContentValidation implements IContentValidation {
   validate(data: ContentData, rules: ValidationRules, context?: any): boolean {
     if (!rules) return true;
 
@@ -85,14 +85,14 @@ class DefaultContentValidation implements IContentValidation {
 }
 
 // Default implementation for IContentConfiguration
-class DefaultContentConfiguration implements IContentConfiguration {
+export class DefaultContentConfiguration implements IContentConfiguration {
   private options: FactoryOptions = {
     validate: true,
     validationRules: {
-      [ContentType.IMAGE]: {
-        required: true,
-        src: { required: true },
-      },
+      // [ContentType.IMAGE]: {
+      //   required: true,
+      //   src: { required: true },
+      // },
       [ContentType.TEXT]: {
         required: true,
         value: { required: true, minLength: 1 },
@@ -111,6 +111,10 @@ class DefaultContentConfiguration implements IContentConfiguration {
   }
 
   setOptions(options: FactoryOptions): void {
+    // Thêm logic validate options nếu cần thiết
+    if (options.validationRules) {
+      // Có thể validate các rule trong options.validationRules
+    }
     this.options = { ...this.options, ...options };
   }
 }
@@ -121,6 +125,8 @@ class DefaultContentConfiguration implements IContentConfiguration {
 export class PluginRegistry {
   private plugins: IContentPlugin[] = [];
 
+  constructor(private factory: IContentElementFactory) {}
+
   /**
    * Registers a plugin.
    * @param plugin - The plugin to register.
@@ -128,8 +134,7 @@ export class PluginRegistry {
   registerPlugin(plugin: IContentPlugin): void {
     this.plugins.push(plugin);
     if (plugin.init) {
-      // Assuming ContentFactory is accessible here, otherwise pass it as an argument
-      plugin.init(new ContentFactory());
+      plugin.init(this.factory);
     }
   }
 
@@ -159,11 +164,12 @@ export class PluginRegistry {
     });
   }
 }
+
 export class ContentFactory implements IContentElementFactory {
   private registry: ContentFactoryRegistry;
   private validator: IContentValidation;
   private config: IContentConfiguration;
-  private pluginRegistry: PluginRegistry = new PluginRegistry();
+  private pluginRegistry: PluginRegistry;
 
   constructor(
     registry: ContentFactoryRegistry = new ContentFactoryRegistry(),
@@ -173,6 +179,7 @@ export class ContentFactory implements IContentElementFactory {
     this.registry = registry;
     this.validator = validator;
     this.config = config;
+    this.pluginRegistry = new PluginRegistry(this); // Pass 'this' to PluginRegistry
 
     // Register default factories
     this.registry.registerFactory(ContentType.IMAGE, new ImageElementFactory());
@@ -207,7 +214,7 @@ export class ContentFactory implements IContentElementFactory {
       const rules = options.validationRules?.[data.type];
       if (rules) {
         // Pass the ContentElement instance as context to the validator
-        this.validator.validate(data, rules, undefined);
+        this.validator.validate(data, rules);
       }
     }
 
