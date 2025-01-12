@@ -17,15 +17,12 @@ import ErrorBoundary from "../ErrorBoundary";
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.mjs`;
 
 import { useMemo } from "react";
-import { useDebugRender } from "../../hooks/useDebugRender";
 
 import { ContentManager } from "../ContentManager";
 import { ContentToolbar } from "../ContentToolbar";
 import { ContentData } from "../../types/_content";
 
 const PDFViewer: React.FC<PDFViewerProps> = (props) => {
-  useDebugRender("PDFViewer", props);
-
   const {
     source,
     outputFileName = "document.pdf",

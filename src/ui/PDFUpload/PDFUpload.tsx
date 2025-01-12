@@ -1,8 +1,6 @@
 import React, { useRef, useState } from "react";
 import styles from "./PDFUpload.module.scss";
 
-console.log("PDFUpload", styles);
-
 // Types
 interface PDFUploadButtonProps {
   onFilesSelected: (files: File[]) => void;
