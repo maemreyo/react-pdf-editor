@@ -9,7 +9,7 @@ import {
 import {
   DefaultContentConfiguration,
   DefaultContentValidation,
-} from "@/components/ContentFactory";
+} from "@/ui/ContentFactory";
 import { ContentFactoryRegistry } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
 

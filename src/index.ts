@@ -1,6 +1,6 @@
 // Components
-export * from "@/components/PDFViewer/PDFViewer";
-export * from "@/components/PDFUpload/PDFUpload";
+export * from "@/ui/PDFViewer/PDFViewer";
+export * from "@/ui/PDFUpload/PDFUpload";
 
 // Types
 export * from "@/types";

@@ -19,8 +19,9 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["./src/*"],
+      "core/*": ["core/*"],
       "plugins/*": ["plugins/*"],
-      "components/*": ["components/*"],
+      "ui/*": ["ui/*"],
       "hooks/*": ["hooks/*"],
       "providers/*": ["providers/*"],
       "strategies/*": ["strategies/*"],
