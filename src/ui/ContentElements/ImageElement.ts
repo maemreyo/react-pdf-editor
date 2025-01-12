@@ -15,6 +15,7 @@ import {
 import { ContentType } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
 import { ContentStateManager } from "@/core/state/ContentStateManager";
+import { DraggableBehaviorPlugin } from "@/plugins/DraggableBehaviorPlugin";
 
 export class ImageElement implements ContentElement {
   readonly id: string;
@@ -49,6 +50,10 @@ export class ImageElement implements ContentElement {
       error: null,
       data: data,
     });
+
+    // Enable dragging
+    const draggablePlugin = new DraggableBehaviorPlugin();
+    draggablePlugin.enableDragging(this, document.createElement("canvas"));
   }
 
   public async loadImage(): Promise<void> {

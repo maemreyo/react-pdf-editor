@@ -26,6 +26,7 @@ import {
   ContentValidationError,
 } from "../core/errors/ContentErrors";
 import { ContentStateManager } from "../core/state/ContentStateManager";
+import { DraggableBehaviorPlugin } from "@/plugins/DraggableBehaviorPlugin";
 
 // Default implementation for IContentValidation
 export class DefaultContentValidation implements IContentValidation {
@@ -198,6 +199,9 @@ export class ContentFactory implements IContentElementFactory {
       ContentType.QRCODE,
       new QRCodeElementFactory(),
     );
+
+    // Register DraggableBehaviorPlugin
+    this.registerPlugin(new DraggableBehaviorPlugin());
 
     // Initialize plugins from config
     const options = this.config.getOptions();

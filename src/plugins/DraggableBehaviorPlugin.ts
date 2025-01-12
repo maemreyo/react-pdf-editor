@@ -15,7 +15,6 @@ interface DragState {
   startX: number;
   startY: number;
 }
-
 export class DraggableBehaviorPlugin implements IBehaviorPlugin {
   name = "DraggableBehaviorPlugin";
   type: BehaviorPluginType = "behavior";
@@ -33,6 +32,7 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       }
     },
   };
+
   init(factory: IContentElementFactory): void {
     try {
       console.log(
@@ -44,6 +44,7 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       ErrorHandler.handle(error as Error);
     }
   }
+
   apply(data: ContentData): void {
     try {
       console.log(`${this.name} applied to data for element id: ${data.id}`);
@@ -51,14 +52,9 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       ErrorHandler.handle(error as Error);
     }
   }
-  // Require canvas
-  enableDragging(element: ContentElement, canvas: HTMLCanvasElement) {
-    canvas.addEventListener("mousedown", this.onMouseDown(element));
-    canvas.addEventListener("mousemove", this.onMouseMove(element));
-    canvas.addEventListener("mouseup", this.onMouseUp(element));
-  }
 
-  private onMouseDown = (element: ContentElement) => (event: MouseEvent) => {
+  // Make these methods public
+  public onMouseDown = (element: ContentElement) => (event: MouseEvent) => {
     const data = element.getData();
     const rect = (event.target as HTMLElement)
       .closest("canvas")
@@ -82,7 +78,8 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       });
     }
   };
-  private onMouseMove = (element: ContentElement) => (event: MouseEvent) => {
+
+  public onMouseMove = (element: ContentElement) => (event: MouseEvent) => {
     const state = this.dragState.get(element.id);
     if (state?.dragging) {
       const data = element.getData();
@@ -101,10 +98,23 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       }
     }
   };
-  private onMouseUp = (element: ContentElement) => () => {
+
+  public onMouseUp = (element: ContentElement) => () => {
     this.dragState.set(element.id, {
       ...this.dragState.get(element.id),
       dragging: false,
     } as DragState);
   };
+
+  enableDragging(element: ContentElement, canvas: HTMLCanvasElement) {
+    canvas.addEventListener("mousedown", this.onMouseDown(element));
+    canvas.addEventListener("mousemove", this.onMouseMove(element));
+    canvas.addEventListener("mouseup", this.onMouseUp(element));
+
+    return () => {
+      canvas.removeEventListener("mousedown", this.onMouseDown(element));
+      canvas.removeEventListener("mousemove", this.onMouseMove(element));
+      canvas.removeEventListener("mouseup", this.onMouseUp(element));
+    };
+  }
 }
