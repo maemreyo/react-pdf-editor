@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { PDFViewerProps } from "@/types";
 import { StaticQRCodeGenerator } from "../../strategies/QRCodeStrategies";
@@ -237,6 +237,14 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     },
     [contentManagerRef],
   );
+
+  useEffect(() => {
+    const canvas = containerRef.current?.querySelector("canvas");
+    const ctx = canvas?.getContext("2d");
+    if (ctx && canvas && !isLoading) {
+      renderContent(ctx, canvas.width, canvas.height);
+    }
+  }, [contentData, isLoading, renderContent]);
 
   // Initialize ContentFactory
   const contentFactory = useMemo(() => {

@@ -51,7 +51,7 @@ export class ImageElement implements ContentElement {
     });
   }
 
-  private async loadImage() {
+  public async loadImage(): Promise<void> {
     if (!this.data.src) {
       this.error = "Image source is required";
       return;
@@ -61,23 +61,36 @@ export class ImageElement implements ContentElement {
     this.error = null;
 
     try {
+      // Đợi convert sang base64
       const base64Image = await getBase64FromImageUrl(this.data.src);
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = base64Image;
 
-      img.onload = () => {
-        this.image = img;
-        this.loading = false;
-      };
+      // Wrap image loading trong Promise để đợi onload/onerror
+      await new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
 
-      img.onerror = () => {
-        this.error = "Error loading image";
-        this.loading = false;
-      };
+        img.onload = () => {
+          this.image = img;
+          this.loading = false;
+          resolve();
+        };
+
+        img.onerror = () => {
+          this.error = "Error loading image";
+          this.loading = false;
+          reject(new Error("Failed to load image"));
+        };
+
+        img.src = base64Image; // Set src sau khi setup onload/onerror
+      });
+
+      // Notify state change after image loaded
+      this.stateManager.setLoading(false);
     } catch (error) {
-      this.error = "Error converting image to base64";
+      this.error =
+        error instanceof Error ? error.message : "Error loading image";
       this.loading = false;
+      this.stateManager.setLoading(false);
       ErrorHandler.handle(error as Error);
     }
   }

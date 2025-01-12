@@ -14,6 +14,8 @@ import {
 } from "../types/_content";
 import { StrategyProvider } from "@/core/di/StrategyProvider";
 import { ContentStateManager } from "@/core/state/ContentStateManager";
+import { ContentType } from "@/types";
+import { ImageElement } from "./ContentElements";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -78,18 +80,26 @@ export const ContentManager = forwardRef<
   }, [contentFactory, initialContent]);
 
   const addContent = useCallback(
-    (data: ContentData) => {
-      console.log("addContent called with data:", data);
+    async (data: ContentData) => {
       if (!contentFactory) {
         console.error("contentFactory is not defined");
         return;
       }
-      const newElement = contentFactory.create(data);
-      console.log("newElement created:", newElement);
-      setContentElements((prev) => [...prev, newElement]);
-      contentDataRef.current = [...contentDataRef.current, data];
-      console.log("contentDataRef.current:", contentDataRef.current);
-      onChange?.(contentDataRef.current);
+
+      try {
+        const newElement = contentFactory.create(data);
+
+        // Nếu là image element, đợi load xong
+        if (newElement.type === ContentType.IMAGE) {
+          await (newElement as ImageElement).loadImage();
+        }
+
+        setContentElements((prev) => [...prev, newElement]);
+        contentDataRef.current = [...contentDataRef.current, data];
+        onChange?.(contentDataRef.current);
+      } catch (error) {
+        console.error("Error adding content:", error);
+      }
     },
     [contentFactory, onChange],
   );
