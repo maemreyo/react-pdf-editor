@@ -100,6 +100,10 @@ export class ImageElement implements ContentElement {
     }
   }
 
+  public getImage(): HTMLImageElement | null {
+    return this.image;
+  }
+
   async render(
     ctx: CanvasRenderingContext2D,
     canvasWidth: number,
@@ -142,8 +146,14 @@ export class ImageElement implements ContentElement {
     if (data.src && data.src !== newData.src) {
       this.loadImage();
     }
+    // Add width and height update after image loaded
+    if (this.image) {
+      this.stateManager.updateData({
+        width: this.image.width,
+        height: this.image.height,
+      });
+    }
   }
-
   getData(): ContentData {
     return this.stateManager.getState().data;
   }

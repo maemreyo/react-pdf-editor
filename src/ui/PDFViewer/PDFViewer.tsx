@@ -49,11 +49,11 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     onContentChange,
   } = props;
 
-  // Memoize complex objects and functions
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const contentManagerRef = useRef<ContentManagerRef | null>(null);
-  // Add content data state
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const [contentData, setContentData] = useState<ContentData[]>([]);
 
   const {
@@ -111,7 +111,6 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     }
   }, [viewMode.isModified, setShowQRCode]);
 
-  // Memoize download handlers
   const handleDownload = useCallback(() => {
     if (!enableDownload || !pdfSource) return;
 
@@ -174,7 +173,6 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     onMerge,
   ]);
 
-  // Memoize toolbar props
   const toolbarProps = useMemo(
     () => ({
       viewMode,
@@ -246,7 +244,6 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     }
   }, [contentData, isLoading, renderContent]);
 
-  // Initialize ContentFactory
   const contentFactory = useMemo(() => {
     console.log("Initializing ContentFactory");
     const diContainer = DIContainer.getInstance();
@@ -285,8 +282,10 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
                 contentFactory={contentFactory}
                 initialContent={initialContent}
                 onChange={handleContentChange}
+                canvasRef={canvasRef}
               />
               <PDFCanvas
+                ref={canvasRef}
                 pdf={pdf}
                 viewMode={viewMode}
                 renderTaskRef={renderTaskRef}

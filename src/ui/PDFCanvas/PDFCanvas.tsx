@@ -1,4 +1,11 @@
-import React, { useRef, useEffect, useCallback } from "react";
+// File: ui/PDFCanvas/PDFCanvas.tsx
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { ViewerMode } from "../../types";
 import styles from "./PDFCanvas.module.scss";
 
@@ -9,65 +16,68 @@ interface PDFCanvasProps {
   onRender?: () => void;
 }
 
-export const PDFCanvas: React.FC<PDFCanvasProps> = ({
-  pdf,
-  viewMode,
-  renderTaskRef,
-  onRender,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const currentRenderTask = useRef<any>(null);
+// Add forwardRef and useImperativeHandle to expose the canvas element
+export const PDFCanvas = forwardRef<HTMLCanvasElement, PDFCanvasProps>(
+  ({ pdf, viewMode, renderTaskRef, onRender }, ref) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const currentRenderTask = useRef<any>(null);
 
-  const renderPage = useCallback(async () => {
-    if (!pdf || !canvasRef.current) return;
+    // Expose the canvas element through the ref
+    useImperativeHandle(ref, () => canvasRef.current!, []);
 
-    try {
-      if (currentRenderTask.current) {
-        await currentRenderTask.current.cancel();
+    const renderPage = useCallback(async () => {
+      if (!pdf || !canvasRef.current) return;
+
+      try {
+        if (currentRenderTask.current) {
+          await currentRenderTask.current.cancel();
+        }
+
+        const page = await pdf.getPage(viewMode.pageNumber);
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+
+        if (!context) return;
+
+        const viewport = page.getViewport({
+          scale: viewMode.zoom,
+          rotation: viewMode.rotation,
+        });
+
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        currentRenderTask.current = page.render({
+          canvasContext: context,
+          viewport: viewport,
+        });
+
+        renderTaskRef.current = currentRenderTask.current;
+
+        await currentRenderTask.current.promise;
+
+        if (onRender) {
+          onRender();
+        }
+      } catch (error: any) {
+        if (error?.name !== "RenderingCancelledException") {
+          console.error("Error rendering page:", error);
+        }
       }
+    }, [pdf, viewMode, renderTaskRef]);
 
-      const page = await pdf.getPage(viewMode.pageNumber);
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
+    useEffect(() => {
+      renderPage();
 
-      if (!context) return;
+      return () => {
+        if (currentRenderTask.current) {
+          currentRenderTask.current.cancel();
+        }
+      };
+    }, [renderPage, viewMode.pageNumber, viewMode.zoom, viewMode.rotation]);
 
-      const viewport = page.getViewport({
-        scale: viewMode.zoom,
-        rotation: viewMode.rotation,
-      });
+    return <canvas ref={canvasRef} className={styles.pdfCanvas} />;
+  },
+);
 
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      currentRenderTask.current = page.render({
-        canvasContext: context,
-        viewport: viewport,
-      });
-
-      renderTaskRef.current = currentRenderTask.current;
-
-      await currentRenderTask.current.promise;
-
-      if (onRender) {
-        onRender();
-      }
-    } catch (error: any) {
-      if (error?.name !== "RenderingCancelledException") {
-        console.error("Error rendering page:", error);
-      }
-    }
-  }, [pdf, viewMode, renderTaskRef]);
-
-  useEffect(() => {
-    renderPage();
-
-    return () => {
-      if (currentRenderTask.current) {
-        currentRenderTask.current.cancel();
-      }
-    };
-  }, [renderPage, viewMode.pageNumber, viewMode.zoom, viewMode.rotation]);
-
-  return <canvas ref={canvasRef} className={styles.pdfCanvas} />;
-};
+PDFCanvas.displayName = "PDFCanvas";

@@ -1,0 +1,5 @@
+/* File: ui/ContentManager.module.scss */
+.contentElement {
+  position: absolute;
+  z-index: 15; /* Ensure ImageElement is above PDFCanvas */
+}

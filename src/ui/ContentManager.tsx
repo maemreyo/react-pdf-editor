@@ -16,12 +16,14 @@ import { StrategyProvider } from "@/core/di/StrategyProvider";
 import { ContentStateManager } from "@/core/state/ContentStateManager";
 import { ContentType } from "@/types";
 import { ImageElement } from "./ContentElements";
+import { DraggableBehaviorPlugin } from "@/plugins/DraggableBehaviorPlugin";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
   initialContent?: ContentData[];
   onChange?: (content: ContentData[]) => void;
   ref?: RefObject<ContentManagerRef>;
+  canvasRef?: RefObject<HTMLCanvasElement>; // Add canvasRef prop
 }
 
 export interface ContentManagerRef {
@@ -41,29 +43,47 @@ StrategyProvider.initialize();
 export const ContentManager = forwardRef<
   ContentManagerRef,
   ContentManagerProps
->(({ contentFactory, initialContent = [], onChange }, ref) => {
+>(({ contentFactory, initialContent = [], onChange, canvasRef }, ref) => {
   const [contentElements, setContentElements] = useState<ContentElement[]>([]);
   const contentDataRef = useRef<ContentData[]>([]);
 
   // Subscribe to changes in content elements
   useEffect(() => {
     const subscriptions = contentElements.map((element) => {
-      if ("stateManager" in element) {
-        return (element.stateManager as ContentStateManager).subscribe(
-          (state) => {
-            // Handle state changes here, e.g., re-render
-            console.log(`State updated for element ${element.id}:`, state);
-            setContentElements((prev) => [...prev]);
-          },
+      const stateManagerSubscription =
+        "stateManager" in element
+          ? (element.stateManager as ContentStateManager).subscribe((state) => {
+              // Update contentDataRef
+              contentDataRef.current = contentDataRef.current.map((data) => {
+                if (data.id === element.id) {
+                  return element.getData();
+                }
+                return data;
+              });
+              onChange?.(contentDataRef.current);
+            })
+          : () => {};
+
+      // Enable dragging if canvasRef is available
+      let draggableCleanup: () => void;
+      if (canvasRef?.current) {
+        const draggablePlugin = new DraggableBehaviorPlugin();
+        draggableCleanup = draggablePlugin.enableDragging(
+          element,
+          canvasRef.current,
         );
       }
-      return () => {};
+
+      return () => {
+        stateManagerSubscription();
+        draggableCleanup?.();
+      };
     });
 
     return () => {
       subscriptions.forEach((unsubscribe) => unsubscribe());
     };
-  }, [contentElements]);
+  }, [contentElements, canvasRef]);
 
   // Khởi tạo các ContentElement từ initialContent
   useEffect(() => {
@@ -166,14 +186,20 @@ export const ContentManager = forwardRef<
 
   return (
     <>
-      {/* Hidden placeholder for rendering, actual rendering will be done in PDFViewer */}
-      <div style={{ display: "none" }}>
-        {contentElements.map((element) => (
-          <div key={element.id} data-type={element.type}>
-            {/* Placeholder for each content element */}
-          </div>
-        ))}
-      </div>
+      {/* Add class name for z-index */}
+      {contentElements.map((element) => (
+        <div
+          key={element.id}
+          data-type={element.type}
+          className="contentElement"
+          style={{
+            left: element.getData().x,
+            top: element.getData().y,
+          }}
+        >
+          {/* Placeholder for each content element */}
+        </div>
+      ))}
     </>
   );
 });
