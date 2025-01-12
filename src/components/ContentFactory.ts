@@ -12,12 +12,14 @@ import {
 } from "@/types/_factory";
 import { ImageElement, TextElement, QRCodeElement } from "./ContentElements";
 
+import { DIContainer } from "../core/di/Container";
+import { DI_TOKENS } from "../core/di/tokens";
 import {
-  DefaultRenderStrategy,
-  DefaultLoadingStrategy,
-  DefaultErrorHandlingStrategy,
-  DefaultStateManagementStrategy,
-} from "@/strategies/DefaultStrategies";
+  IRenderStrategy,
+  ILoadingStrategy,
+  IErrorHandlingStrategy,
+  IStateManagementStrategy,
+} from "../types/_strategies";
 
 // Default implementation for IContentValidation
 export class DefaultContentValidation implements IContentValidation {
@@ -162,17 +164,20 @@ export class PluginRegistry {
   }
 }
 
+// Updated ContentFactory using the new interfaces and registry
 export class ContentFactory implements IContentElementFactory {
   private registry: ContentFactoryRegistry;
   private validator: IContentValidation;
   private config: IContentConfiguration;
   private pluginRegistry: PluginRegistry;
+  private diContainer: DIContainer;
 
   constructor(
-    registry: ContentFactoryRegistry = new ContentFactoryRegistry(),
-    validator: IContentValidation = new DefaultContentValidation(),
-    config: IContentConfiguration = new DefaultContentConfiguration(),
+    registry: ContentFactoryRegistry,
+    validator: IContentValidation,
+    config: IContentConfiguration,
   ) {
+    this.diContainer = DIContainer.getInstance();
     this.registry = registry;
     this.validator = validator;
     this.config = config;
@@ -193,10 +198,6 @@ export class ContentFactory implements IContentElementFactory {
     }
   }
 
-  registerPlugin(plugin: IContentPlugin): void {
-    this.pluginRegistry.registerPlugin(plugin);
-  }
-
   create(data: ContentData): ContentElement {
     // Apply plugins
     this.pluginRegistry.applyPlugins(data);
@@ -210,63 +211,137 @@ export class ContentFactory implements IContentElementFactory {
     if (options.validate) {
       const rules = options.validationRules?.[data.type];
       if (rules) {
-        // Pass the ContentElement instance as context to the validator
         this.validator.validate(data, rules);
       }
     }
 
-    // Inject default strategies when creating elements
-    const defaultRenderStrategy = new DefaultRenderStrategy();
-    const defaultLoadingStrategy = new DefaultLoadingStrategy();
-    const defaultErrorHandlingStrategy = new DefaultErrorHandlingStrategy();
-    const defaultStateManagementStrategy = new DefaultStateManagementStrategy();
+    // Resolve strategies from DI container
+    const renderStrategy = this.diContainer.resolve<IRenderStrategy>(
+      DI_TOKENS.RENDER_STRATEGY,
+    );
+    const loadingStrategy = this.diContainer.resolve<ILoadingStrategy>(
+      DI_TOKENS.LOADING_STRATEGY,
+    );
+    const errorHandlingStrategy =
+      this.diContainer.resolve<IErrorHandlingStrategy>(
+        DI_TOKENS.ERROR_HANDLING_STRATEGY,
+      );
+    const stateManagementStrategy =
+      this.diContainer.resolve<IStateManagementStrategy>(
+        DI_TOKENS.STATE_MANAGEMENT_STRATEGY,
+      );
 
     if (data.type === ContentType.IMAGE) {
       return new ImageElement(
         data,
-        defaultRenderStrategy,
-        defaultLoadingStrategy,
-        defaultErrorHandlingStrategy,
-        defaultStateManagementStrategy,
+        renderStrategy,
+        loadingStrategy,
+        errorHandlingStrategy,
+        stateManagementStrategy,
       );
     } else if (data.type === ContentType.TEXT) {
       return new TextElement(
         data,
-        defaultRenderStrategy,
-        defaultLoadingStrategy,
-        defaultErrorHandlingStrategy,
-        defaultStateManagementStrategy,
+        renderStrategy,
+        loadingStrategy,
+        errorHandlingStrategy,
+        stateManagementStrategy,
       );
     } else if (data.type === ContentType.QRCODE) {
       return new QRCodeElement(
         data,
-        defaultRenderStrategy,
-        defaultLoadingStrategy,
-        defaultErrorHandlingStrategy,
-        defaultStateManagementStrategy,
+        renderStrategy,
+        loadingStrategy,
+        errorHandlingStrategy,
+        stateManagementStrategy,
       );
     } else {
       throw new Error(`Unsupported content type: ${data.type}`);
     }
   }
+
+  registerPlugin(plugin: IContentPlugin): void {
+    this.pluginRegistry.registerPlugin(plugin);
+  }
 }
+
 // Factory for creating ImageElement
 class ImageElementFactory implements IContentElementFactory {
   create(data: ContentData): ContentElement {
-    return new ImageElement(data);
+    const diContainer = DIContainer.getInstance();
+    const renderStrategy = diContainer.resolve<IRenderStrategy>(
+      DI_TOKENS.RENDER_STRATEGY,
+    );
+    const loadingStrategy = diContainer.resolve<ILoadingStrategy>(
+      DI_TOKENS.LOADING_STRATEGY,
+    );
+    const errorHandlingStrategy = diContainer.resolve<IErrorHandlingStrategy>(
+      DI_TOKENS.ERROR_HANDLING_STRATEGY,
+    );
+    const stateManagementStrategy =
+      diContainer.resolve<IStateManagementStrategy>(
+        DI_TOKENS.STATE_MANAGEMENT_STRATEGY,
+      );
+    return new ImageElement(
+      data,
+      renderStrategy,
+      loadingStrategy,
+      errorHandlingStrategy,
+      stateManagementStrategy,
+    );
   }
 }
 
 // Factory for creating TextElement
 class TextElementFactory implements IContentElementFactory {
   create(data: ContentData): ContentElement {
-    return new TextElement(data);
+    const diContainer = DIContainer.getInstance();
+    const renderStrategy = diContainer.resolve<IRenderStrategy>(
+      DI_TOKENS.RENDER_STRATEGY,
+    );
+    const loadingStrategy = diContainer.resolve<ILoadingStrategy>(
+      DI_TOKENS.LOADING_STRATEGY,
+    );
+    const errorHandlingStrategy = diContainer.resolve<IErrorHandlingStrategy>(
+      DI_TOKENS.ERROR_HANDLING_STRATEGY,
+    );
+    const stateManagementStrategy =
+      diContainer.resolve<IStateManagementStrategy>(
+        DI_TOKENS.STATE_MANAGEMENT_STRATEGY,
+      );
+    return new TextElement(
+      data,
+      renderStrategy,
+      loadingStrategy,
+      errorHandlingStrategy,
+      stateManagementStrategy,
+    );
   }
 }
 
 // Factory for creating QRCodeElement
 class QRCodeElementFactory implements IContentElementFactory {
   create(data: ContentData): ContentElement {
-    return new QRCodeElement(data);
+    const diContainer = DIContainer.getInstance();
+    const renderStrategy = diContainer.resolve<IRenderStrategy>(
+      DI_TOKENS.RENDER_STRATEGY,
+    );
+    const loadingStrategy = diContainer.resolve<ILoadingStrategy>(
+      DI_TOKENS.LOADING_STRATEGY,
+    );
+    const errorHandlingStrategy = diContainer.resolve<IErrorHandlingStrategy>(
+      DI_TOKENS.ERROR_HANDLING_STRATEGY,
+    );
+    const stateManagementStrategy =
+      diContainer.resolve<IStateManagementStrategy>(
+        DI_TOKENS.STATE_MANAGEMENT_STRATEGY,
+      );
+    return new QRCodeElement(
+      data,
+      renderStrategy,
+      loadingStrategy,
+      errorHandlingStrategy,
+      stateManagementStrategy,
+    );
   }
 }

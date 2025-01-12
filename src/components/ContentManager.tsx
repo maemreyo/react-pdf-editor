@@ -1,16 +1,13 @@
-// File: src/components/ContentManager.tsx
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   ContentElement,
   ContentData,
   ContentFactory as IContentFactory,
 } from "../types/_content";
-import {
-  ContentFactory,
-  DefaultContentConfiguration,
-  DefaultContentValidation,
-} from "./ContentFactory";
-import { ContentFactoryRegistry } from "@/types";
+import { ContentFactory } from "./ContentFactory";
+import { StrategyProvider } from "@/core/di/StrategyProvider";
+import { DIContainer } from "@/core/di/Container";
+import { DI_TOKENS } from "@/core/di/tokens";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -18,11 +15,14 @@ interface ContentManagerProps {
   onChange?: (content: ContentData[]) => void;
 }
 
+// Initialize strategies
+StrategyProvider.initialize();
+
 export const ContentManager: React.FC<ContentManagerProps> = ({
   contentFactory = new ContentFactory(
-    new ContentFactoryRegistry(),
-    new DefaultContentValidation(),
-    new DefaultContentConfiguration(),
+    DIContainer.getInstance().resolve(DI_TOKENS.CONTENT_REGISTRY),
+    DIContainer.getInstance().resolve(DI_TOKENS.CONTENT_VALIDATION),
+    DIContainer.getInstance().resolve(DI_TOKENS.CONTENT_CONFIGURATION),
   ),
   initialContent = [],
   onChange,
@@ -37,7 +37,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
     );
     setContentElements(initialElements);
     contentDataRef.current = initialContent;
-  }, [initialContent, contentFactory]);
+  }, []);
 
   const addContent = useCallback(
     (data: ContentData) => {
