@@ -1,3 +1,4 @@
+// File: src/components/PDFViewer/PDFViewer.tsx
 import React, { useRef, useState, useCallback } from "react";
 import * as pdfjsLib from "pdfjs-dist";
 import { PDFViewerProps } from "@/types";
@@ -16,6 +17,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.j
 
 import { useMemo } from "react";
 import { useDebugRender } from "../../hooks/useDebugRender";
+
+import { ContentManager } from "../ContentManager";
+import { ContentToolbar } from "../ContentToolbar";
+import { ContentData } from "../../types/_content";
 
 const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   useDebugRender("PDFViewer", props);
@@ -36,11 +41,16 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     onViewModeChange,
     onMerge,
     qrCodeGeneratorStrategy,
+    initialContent = [],
+    onContentChange,
   } = props;
 
   // Memoize complex objects and functions
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
+  const contentManagerRef = useRef<HTMLDivElement>(null);
+  // Add content data state
+  const [contentData, setContentData] = useState<ContentData[]>([]);
 
   const {
     viewMode,
@@ -199,8 +209,39 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
     ],
   );
 
+  const handleContentChange = useCallback(
+    (content: ContentData[]) => {
+      setContentData(content);
+      onContentChange?.(content); // Call onContentChange prop
+    },
+    [onContentChange],
+  );
+
+  const renderContent = useCallback(
+    async (
+      ctx: CanvasRenderingContext2D,
+      canvasWidth: number,
+      canvasHeight: number,
+    ) => {
+      if (contentManagerRef.current) {
+        const renderContentFunc =
+          contentManagerRef.current.dataset.renderContentFunc;
+        if (renderContentFunc) {
+          // @ts-ignore
+          await contentManagerRef.current[renderContentFunc](
+            ctx,
+            canvasWidth,
+            canvasHeight,
+          );
+        }
+      }
+    },
+    [],
+  );
+
   return (
     <div ref={containerRef} className={styles.pdfViewer}>
+      <ContentToolbar contentManagerRef={contentManagerRef} />
       <PDFToolbar {...toolbarProps} />
 
       <div
@@ -217,11 +258,23 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
           </div>
         ) : (
           <div className="position-relative">
+            <ContentManager
+              ref={contentManagerRef}
+              initialContent={initialContent}
+              onChange={handleContentChange}
+            />
             <PDFCanvas
               pdf={pdf}
               viewMode={viewMode}
               renderTaskRef={renderTaskRef}
-              onRender={handleCanvasRender}
+              onRender={() => {
+                handleCanvasRender();
+                const canvas = containerRef.current?.querySelector("canvas");
+                const ctx = canvas?.getContext("2d");
+                if (ctx) {
+                  renderContent(ctx, canvas.width, canvas.height);
+                }
+              }}
             />
             {showQRCode && (
               <QRCodeCanvas

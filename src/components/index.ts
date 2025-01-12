@@ -5,3 +5,6 @@ export * from "./PDFToolbar/PDFToolbar";
 export * from "./PDFUpload/PDFUpload";
 export * from "./PDFViewer/PDFViewer";
 export * from "./QRCodeCanvas/QRCodeCanvas";
+export * from "./ContentFactory";
+export * from "./ContentManager";
+export * from "./ContentToolbar";

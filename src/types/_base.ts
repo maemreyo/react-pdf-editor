@@ -1,3 +1,6 @@
+import { ContentData } from "./_content";
+
+// File: src/types/_base.ts
 export interface QRCodePosition {
   x: number;
   y: number;
@@ -12,6 +15,11 @@ export interface ViewerMode {
   totalPages: number;
   isModified: boolean;
 }
+
+export type Content = {
+  type: "text" | "image" | "qrcode";
+  data: any;
+};
 
 export interface PDFViewerProps {
   source: string | Blob | ArrayBuffer;
@@ -30,6 +38,8 @@ export interface PDFViewerProps {
   onMerge?: (data: any) => void;
   qrLink?: string;
   qrCodeGeneratorStrategy?: QRCodeGenerator;
+  initialContent?: ContentData[];
+  onContentChange?: (content: ContentData[]) => void;
 }
 
 export interface PDFSource {
