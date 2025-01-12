@@ -1,3 +1,4 @@
+import { ContentStateManager } from "@/core/state/ContentStateManager";
 import { ContentType } from "./_factory";
 
 // Định nghĩa interface cho dữ liệu đầu vào của các Content Element
@@ -19,7 +20,7 @@ export interface ContentData {
 export interface ContentElement {
   readonly id: string;
   readonly type: ContentData["type"];
-
+  stateManager: ContentStateManager;
   // Phương thức để render element lên canvas
   render(
     ctx: CanvasRenderingContext2D,

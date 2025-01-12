@@ -256,7 +256,6 @@ export class ContentFactory implements IContentElementFactory {
       this.diContainer.resolve<IStateManagementStrategy>(
         DI_TOKENS.STATE_MANAGEMENT_STRATEGY,
       );
-
     if (data.type === ContentType.IMAGE) {
       const element = new ImageElement(
         data,

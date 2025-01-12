@@ -282,10 +282,10 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
                 contentFactory={contentFactory}
                 initialContent={initialContent}
                 onChange={handleContentChange}
-                canvasRef={canvasRef}
+                canvasRef={canvasRef} // Pass canvasRef to ContentManager
               />
               <PDFCanvas
-                ref={canvasRef}
+                ref={canvasRef} // Pass canvasRef to PDFCanvas
                 pdf={pdf}
                 viewMode={viewMode}
                 renderTaskRef={renderTaskRef}

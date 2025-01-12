@@ -32,7 +32,7 @@ export class QRCodeElement implements ContentElement {
   private loadingStrategy: ILoadingStrategy;
   private errorHandlingStrategy: IErrorHandlingStrategy;
   private stateManagementStrategy: IStateManagementStrategy;
-  private stateManager: ContentStateManager;
+  stateManager: ContentStateManager;
 
   constructor(
     data: ContentData,

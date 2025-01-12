@@ -1,3 +1,4 @@
+// File: ui/ContentElements/ImageElement.ts
 import { ContentElement, ContentData } from "../../types/_content";
 import { getBase64FromImageUrl } from "../../utils";
 import {
@@ -15,7 +16,6 @@ import {
 import { ContentType } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
 import { ContentStateManager } from "@/core/state/ContentStateManager";
-import { DraggableBehaviorPlugin } from "@/plugins/DraggableBehaviorPlugin";
 
 export class ImageElement implements ContentElement {
   readonly id: string;
@@ -28,7 +28,7 @@ export class ImageElement implements ContentElement {
   private loadingStrategy: ILoadingStrategy;
   private errorHandlingStrategy: IErrorHandlingStrategy;
   private stateManagementStrategy: IStateManagementStrategy;
-  private stateManager: ContentStateManager;
+  stateManager: ContentStateManager;
 
   constructor(
     data: ContentData,
@@ -50,10 +50,6 @@ export class ImageElement implements ContentElement {
       error: null,
       data: data,
     });
-
-    // Enable dragging
-    const draggablePlugin = new DraggableBehaviorPlugin();
-    draggablePlugin.enableDragging(this, document.createElement("canvas"));
   }
 
   public async loadImage(): Promise<void> {
@@ -100,10 +96,6 @@ export class ImageElement implements ContentElement {
     }
   }
 
-  public getImage(): HTMLImageElement | null {
-    return this.image;
-  }
-
   async render(
     ctx: CanvasRenderingContext2D,
     canvasWidth: number,
@@ -146,15 +138,14 @@ export class ImageElement implements ContentElement {
     if (data.src && data.src !== newData.src) {
       this.loadImage();
     }
-    // Add width and height update after image loaded
-    if (this.image) {
-      this.stateManager.updateData({
-        width: this.image.width,
-        height: this.image.height,
-      });
-    }
   }
+
   getData(): ContentData {
     return this.stateManager.getState().data;
+  }
+
+  // Add a method to get the image (for DraggableBehaviorPlugin)
+  public getImage(): HTMLImageElement | null {
+    return this.image;
   }
 }

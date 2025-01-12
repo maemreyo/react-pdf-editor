@@ -1,3 +1,4 @@
+// File: ui/ContentManager.tsx
 import React, {
   useState,
   useCallback,
@@ -15,8 +16,8 @@ import {
 import { StrategyProvider } from "@/core/di/StrategyProvider";
 import { ContentStateManager } from "@/core/state/ContentStateManager";
 import { ContentType } from "@/types";
-import { ImageElement } from "./ContentElements";
-import { DraggableBehaviorPlugin } from "@/plugins/DraggableBehaviorPlugin";
+import { ImageElement, TextElement, QRCodeElement } from "./ContentElements";
+import { DEFAULT_VIEWER_CONFIG } from "@/constants";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -45,45 +46,9 @@ export const ContentManager = forwardRef<
   ContentManagerProps
 >(({ contentFactory, initialContent = [], onChange, canvasRef }, ref) => {
   const [contentElements, setContentElements] = useState<ContentElement[]>([]);
-  const contentDataRef = useRef<ContentData[]>([]);
-
-  // Subscribe to changes in content elements
-  useEffect(() => {
-    const subscriptions = contentElements.map((element) => {
-      const stateManagerSubscription =
-        "stateManager" in element
-          ? (element.stateManager as ContentStateManager).subscribe((state) => {
-              // Update contentDataRef
-              contentDataRef.current = contentDataRef.current.map((data) => {
-                if (data.id === element.id) {
-                  return element.getData();
-                }
-                return data;
-              });
-              onChange?.(contentDataRef.current);
-            })
-          : () => {};
-
-      // Enable dragging if canvasRef is available
-      let draggableCleanup: () => void;
-      if (canvasRef?.current) {
-        const draggablePlugin = new DraggableBehaviorPlugin();
-        draggableCleanup = draggablePlugin.enableDragging(
-          element,
-          canvasRef.current,
-        );
-      }
-
-      return () => {
-        stateManagerSubscription();
-        draggableCleanup?.();
-      };
-    });
-
-    return () => {
-      subscriptions.forEach((unsubscribe) => unsubscribe());
-    };
-  }, [contentElements, canvasRef]);
+  const contentDataRef = useRef<ContentData[]>(initialContent);
+  const draggingElementId = useRef<string | null>(null);
+  const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Khởi tạo các ContentElement từ initialContent
   useEffect(() => {
@@ -126,24 +91,25 @@ export const ContentManager = forwardRef<
 
   const updateContent = useCallback(
     (id: string, data: Partial<ContentData>) => {
-      setContentElements((prev) =>
-        prev.map((element) => {
-          if (element.id === id) {
-            element.update(data);
-          }
-          return element;
-        }),
-      );
-      onChange?.(
-        contentElements.map((el) => {
-          const data = el.getData();
-          return {
-            ...data,
-          };
-        }),
-      );
+      const updatedContentElements = contentElements.map((element) => {
+        if (element.id === id) {
+          element.update(data);
+        }
+        return element;
+      });
+
+      setContentElements(updatedContentElements);
+
+      contentDataRef.current = contentDataRef.current.map((c) => {
+        if (c.id === id) {
+          return { ...c, ...data };
+        }
+        return c;
+      });
+
+      onChange?.(contentDataRef.current);
     },
-    [onChange, contentElements],
+    [contentElements, onChange],
   );
 
   const removeContent = useCallback(
@@ -184,22 +150,117 @@ export const ContentManager = forwardRef<
     [addContent, updateContent, removeContent, renderContent],
   );
 
+  const getElementSize = (
+    element: ContentElement,
+  ): { width: number; height: number } => {
+    let width = 50; // Default size
+    let height = 50; // Default size
+
+    const data = element.getData();
+
+    if (element.type === "image") {
+      const imgElement = element as ImageElement;
+      if (imgElement.getImage()) {
+        width = imgElement.getImage().width;
+        height = imgElement.getImage().height;
+      }
+    } else if (element.type === "qrcode") {
+      width = data.size
+        ? (data.size * (data.dpi || DEFAULT_VIEWER_CONFIG.DEFAULT_DPI)) / 96
+        : DEFAULT_VIEWER_CONFIG.DEFAULT_QR_SIZE;
+      height = width;
+    } else if (element.type === "text") {
+      // Approximating text size - might need a more accurate method
+      const textMetrics = measureText(data.value || "", "16px Arial"); // Assuming a default font
+      width = textMetrics.width;
+      height =
+        textMetrics.actualBoundingBoxAscent +
+        textMetrics.actualBoundingBoxDescent;
+    }
+    // Add more conditions for other types if necessary
+
+    return { width, height };
+  };
+
+  // Helper function to measure text size (rough approximation)
+  const measureText = (text: string, font: string): TextMetrics => {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) return {} as TextMetrics;
+    context.font = font;
+    return context.measureText(text);
+  };
+
+  const handleMouseDown = useCallback(
+    (event: React.MouseEvent) => {
+      const canvasRect = canvasRef?.current?.getBoundingClientRect();
+      if (!canvasRect) return;
+
+      const mouseX = event.clientX - canvasRect.left;
+      const mouseY = event.clientY - canvasRect.top;
+
+      // Iterate backwards to check elements on top first
+      for (let i = contentElements.length - 1; i >= 0; i--) {
+        const element = contentElements[i];
+        const data = element.getData();
+        const { width, height } = getElementSize(element);
+
+        if (
+          mouseX >= data.x &&
+          mouseX <= data.x + width &&
+          mouseY >= data.y &&
+          mouseY <= data.y + height
+        ) {
+          draggingElementId.current = element.id;
+          dragOffset.current = { x: mouseX - data.x, y: mouseY - data.y };
+          break; // Stop checking further elements
+        }
+      }
+    },
+    [contentElements, canvasRef],
+  );
+
+  const handleMouseMove = useCallback(
+    (event: React.MouseEvent) => {
+      if (!draggingElementId.current) return;
+
+      const canvasRect = canvasRef?.current?.getBoundingClientRect();
+      if (!canvasRect) return;
+
+      const mouseX = event.clientX - canvasRect.left;
+      const mouseY = event.clientY - canvasRect.top;
+
+      const newX = mouseX - dragOffset.current.x;
+      const newY = mouseY - dragOffset.current.y;
+
+      updateContent(draggingElementId.current, { x: newX, y: newY });
+    },
+    [canvasRef, updateContent],
+  );
+
+  const handleMouseUp = useCallback(() => {
+    draggingElementId.current = null;
+    dragOffset.current = { x: 0, y: 0 };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef?.current;
+    if (canvas) {
+      canvas.addEventListener("mousedown", handleMouseDown as any);
+      canvas.addEventListener("mousemove", handleMouseMove as any);
+      canvas.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        canvas.removeEventListener("mousedown", handleMouseDown as any);
+        canvas.removeEventListener("mousemove", handleMouseMove as any);
+        canvas.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [canvasRef, handleMouseDown, handleMouseMove, handleMouseUp]);
+
   return (
     <>
-      {/* Add class name for z-index */}
-      {contentElements.map((element) => (
-        <div
-          key={element.id}
-          data-type={element.type}
-          className="contentElement"
-          style={{
-            left: element.getData().x,
-            top: element.getData().y,
-          }}
-        >
-          {/* Placeholder for each content element */}
-        </div>
-      ))}
+      {/* No need for the extra div for rendering, as elements are not React components */}
     </>
   );
 });
