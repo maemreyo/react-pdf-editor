@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Meta, StoryFn } from "@storybook/react";
-import PDFViewerComponent from "./PDFViewer";
+import PDFViewer from "./PDFViewer";
 import { PDFUploadButton } from "../PDFUpload/PDFUpload";
 import { PDFViewerProps } from "@/types";
+import { DEFAULT_VIEWER_CONFIG } from "@/constants";
 
-const meta: Meta<typeof PDFViewerComponent> = {
-  title: "Components/PDFControlStory",
-  component: PDFViewerComponent,
-
+const meta: Meta<typeof PDFViewer> = {
+  title: "Components/PDFViewer",
+  component: PDFViewer,
   argTypes: {
     outputFileName: {
       control: { type: "text" },
@@ -23,7 +23,7 @@ const meta: Meta<typeof PDFViewerComponent> = {
     },
     qrCodeImage: {
       control: { type: "text" },
-      qrCodeImage: "https://placehold.co/150x150/png",
+      defaultValue: "https://placehold.co/150x150/png",
     },
     qrLink: {
       control: { type: "text" },
@@ -31,7 +31,7 @@ const meta: Meta<typeof PDFViewerComponent> = {
     },
     defaultQRSize: {
       control: { type: "number" },
-      defaultValue: 20,
+      defaultValue: DEFAULT_VIEWER_CONFIG.DEFAULT_QR_SIZE,
     },
     initialZoom: {
       control: { type: "number" },
@@ -39,11 +39,11 @@ const meta: Meta<typeof PDFViewerComponent> = {
     },
     minZoom: {
       control: { type: "number" },
-      defaultValue: 0.5,
+      defaultValue: DEFAULT_VIEWER_CONFIG.MIN_ZOOM,
     },
     maxZoom: {
       control: { type: "number" },
-      defaultValue: 3,
+      defaultValue: DEFAULT_VIEWER_CONFIG.MAX_ZOOM,
     },
     mergeOutputType: {
       control: { type: "select" },
@@ -56,7 +56,6 @@ const meta: Meta<typeof PDFViewerComponent> = {
     qrCodeGeneratorStrategy: {
       control: { type: "object" },
     },
-
     initialContent: {
       control: "object",
       defaultValue: [],
@@ -70,7 +69,7 @@ const meta: Meta<typeof PDFViewerComponent> = {
 
 export default meta;
 
-const PDFControlStoryTemplate: StoryFn<typeof PDFViewerComponent> = (args) => {
+const PDFViewerTemplate: StoryFn<typeof PDFViewer> = (args) => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const handleFileSelected = (files: File[]) => {
@@ -90,24 +89,24 @@ const PDFControlStoryTemplate: StoryFn<typeof PDFViewerComponent> = (args) => {
         <PDFUploadButton onFilesSelected={handleFileSelected} variant="zone">
           Upload PDF
         </PDFUploadButton>
-      ) : null}
-
-      {uploadedFile && <PDFViewerComponent {...args} source={uploadedFile} />}
+      ) : (
+        <PDFViewer {...args} source={uploadedFile} />
+      )}
     </div>
   );
 };
 
-export const PDFControlStory = PDFControlStoryTemplate.bind({});
+export const Default = PDFViewerTemplate.bind({});
 
-PDFControlStory.args = {
+Default.args = {
   enableDownload: true,
   enableQRCode: true,
   qrLink: "https://example.com",
   outputFileName: "output.pdf",
-  defaultQRSize: 20,
+  defaultQRSize: DEFAULT_VIEWER_CONFIG.DEFAULT_QR_SIZE,
   initialZoom: 1,
-  minZoom: 0.5,
-  maxZoom: 3,
+  minZoom: DEFAULT_VIEWER_CONFIG.MIN_ZOOM,
+  maxZoom: DEFAULT_VIEWER_CONFIG.MAX_ZOOM,
   initialContent: [],
   onContentChange: undefined,
 } as Partial<PDFViewerProps>;
