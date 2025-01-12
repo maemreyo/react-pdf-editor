@@ -1,3 +1,4 @@
+import { ErrorHandler } from "@/core/errors/ErrorHandler";
 import {
   IContentValidation,
   IValidationPlugin,
@@ -17,14 +18,22 @@ export class MaxLengthValidationPlugin implements IValidationPlugin {
     this.validator = new MaxLengthValidator(maxLength);
   }
   init(factory: IContentElementFactory): void {
-    console.log(
-      `${this.name} initialized with factory: ${
-        (factory as ContentFactory).constructor.name
-      }`,
-    );
+    try {
+      console.log(
+        `${this.name} initialized with factory: ${
+          (factory as ContentFactory).constructor.name
+        }`,
+      );
+    } catch (error) {
+      ErrorHandler.handle(error as Error);
+    }
   }
   apply(data: ContentData): void {
-    console.log(`${this.name} applied to data for element id: ${data.id}`);
+    try {
+      console.log(`${this.name} applied to data for element id: ${data.id}`);
+    } catch (error) {
+      ErrorHandler.handle(error as Error);
+    }
   }
 }
 

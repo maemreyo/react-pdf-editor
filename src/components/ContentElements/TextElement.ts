@@ -12,6 +12,7 @@ import {
   DefaultStateManagementStrategy,
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
+import { ErrorHandler } from "../../core/errors/ErrorHandler";
 
 export class TextElement implements ContentElement {
   readonly id: string;
@@ -42,8 +43,12 @@ export class TextElement implements ContentElement {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    // Delegate rendering to the render strategy
-    await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+    try {
+      // Delegate rendering to the render strategy
+      await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+    } catch (error) {
+      ErrorHandler.handle(error as Error);
+    }
   }
 
   update(data: Partial<ContentData>): void {

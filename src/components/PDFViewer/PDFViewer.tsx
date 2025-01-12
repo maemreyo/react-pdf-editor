@@ -12,6 +12,7 @@ import { QRCodeCanvas } from "../QRCodeCanvas/QRCodeCanvas";
 import { mergeQRCodeWithPDF, downloadPDF, downloadBlob } from "../../utils";
 import { DEFAULT_VIEWER_CONFIG } from "../../constants";
 import styles from "./PDFViewer.module.scss";
+import ErrorBoundary from "../ErrorBoundary";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.mjs`;
 
@@ -241,62 +242,64 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
 
   return (
     <div ref={containerRef} className={styles.pdfViewer}>
-      <ContentToolbar contentManagerRef={contentManagerRef} />
-      <PDFToolbar {...toolbarProps} />
+      <ErrorBoundary>
+        <ContentToolbar contentManagerRef={contentManagerRef} />
+        <PDFToolbar {...toolbarProps} />
 
-      <div
-        className={styles.pdfViewer__canvasContainer}
-        style={{ height: DEFAULT_VIEWER_CONFIG.DEFAULT_VIEWER_HEIGHT }}
-      >
-        {isLoading ? (
-          <div className={styles.pdfViewer__spinner} role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        ) : error ? (
-          <div className={styles.pdfViewer__errorAlert}>
-            Error loading PDF: {error.message}
-          </div>
-        ) : (
-          <div className="position-relative">
-            <ContentManager
-              ref={contentManagerRef}
-              initialContent={initialContent}
-              onChange={handleContentChange}
-            />
-            <PDFCanvas
-              pdf={pdf}
-              viewMode={viewMode}
-              renderTaskRef={renderTaskRef}
-              onRender={() => {
-                handleCanvasRender();
-                const canvas = containerRef.current?.querySelector("canvas");
-                const ctx = canvas?.getContext("2d");
-                if (ctx) {
-                  renderContent(ctx, canvas.width, canvas.height);
-                }
-              }}
-            />
-            {showQRCode && (
-              <QRCodeCanvas
-                qrPosition={qrPosition}
-                qrCodeImage={qrCodeImage}
-                width={canvasSize.width}
-                height={canvasSize.height}
-                onDragStart={handleDragStart}
-                onDrag={(e) =>
-                  handleDrag(
-                    e,
-                    containerRef.current?.getBoundingClientRect() as DOMRect,
-                    canvasSize.width,
-                    canvasSize.height,
-                  )
-                }
-                onDragEnd={handleDragEnd}
+        <div
+          className={styles.pdfViewer__canvasContainer}
+          style={{ height: DEFAULT_VIEWER_CONFIG.DEFAULT_VIEWER_HEIGHT }}
+        >
+          {isLoading ? (
+            <div className={styles.pdfViewer__spinner} role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          ) : error ? (
+            <div className={styles.pdfViewer__errorAlert}>
+              Error loading PDF: {error.message}
+            </div>
+          ) : (
+            <div className="position-relative">
+              <ContentManager
+                ref={contentManagerRef}
+                initialContent={initialContent}
+                onChange={handleContentChange}
               />
-            )}
-          </div>
-        )}
-      </div>
+              <PDFCanvas
+                pdf={pdf}
+                viewMode={viewMode}
+                renderTaskRef={renderTaskRef}
+                onRender={() => {
+                  handleCanvasRender();
+                  const canvas = containerRef.current?.querySelector("canvas");
+                  const ctx = canvas?.getContext("2d");
+                  if (ctx) {
+                    renderContent(ctx, canvas.width, canvas.height);
+                  }
+                }}
+              />
+              {showQRCode && (
+                <QRCodeCanvas
+                  qrPosition={qrPosition}
+                  qrCodeImage={qrCodeImage}
+                  width={canvasSize.width}
+                  height={canvasSize.height}
+                  onDragStart={handleDragStart}
+                  onDrag={(e) =>
+                    handleDrag(
+                      e,
+                      containerRef.current?.getBoundingClientRect() as DOMRect,
+                      canvasSize.width,
+                      canvasSize.height,
+                    )
+                  }
+                  onDragEnd={handleDragEnd}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </ErrorBoundary>
     </div>
   );
 };

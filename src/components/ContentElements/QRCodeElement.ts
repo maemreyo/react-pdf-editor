@@ -17,6 +17,7 @@ import {
   DefaultStateManagementStrategy,
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
+import { ErrorHandler } from "../../core/errors/ErrorHandler";
 
 export class QRCodeElement implements ContentElement {
   readonly id: string;
@@ -67,6 +68,7 @@ export class QRCodeElement implements ContentElement {
       });
     } catch (error) {
       this.error = "Error generating QR Code";
+      ErrorHandler.handle(error as Error);
     } finally {
       this.loading = false;
     }
@@ -77,24 +79,33 @@ export class QRCodeElement implements ContentElement {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    if (this.loading) {
-      this.loadingStrategy.handleLoading(this, ctx, canvasWidth, canvasHeight);
-      return;
-    }
+    try {
+      if (this.loading) {
+        this.loadingStrategy.handleLoading(
+          this,
+          ctx,
+          canvasWidth,
+          canvasHeight,
+        );
+        return;
+      }
 
-    if (this.error) {
-      this.errorHandlingStrategy.handleError(
-        this,
-        ctx,
-        canvasWidth,
-        canvasHeight,
-        this.error,
-      );
-      return;
-    }
-    if (this.qrCodeImage) {
-      // Delegate rendering to the render strategy
-      await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+      if (this.error) {
+        this.errorHandlingStrategy.handleError(
+          this,
+          ctx,
+          canvasWidth,
+          canvasHeight,
+          this.error,
+        );
+        return;
+      }
+      if (this.qrCodeImage) {
+        // Delegate rendering to the render strategy
+        await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+      }
+    } catch (error) {
+      ErrorHandler.handle(error as Error);
     }
   }
 

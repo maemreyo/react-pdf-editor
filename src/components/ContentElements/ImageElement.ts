@@ -13,6 +13,7 @@ import {
   DefaultStateManagementStrategy,
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
+import { ErrorHandler } from "../../core/errors/ErrorHandler";
 
 export class ImageElement implements ContentElement {
   readonly id: string;
@@ -69,6 +70,7 @@ export class ImageElement implements ContentElement {
     } catch (error) {
       this.error = "Error converting image to base64";
       this.loading = false;
+      ErrorHandler.handle(error as Error);
     }
   }
 
@@ -77,25 +79,34 @@ export class ImageElement implements ContentElement {
     canvasWidth: number,
     canvasHeight: number,
   ): Promise<void> {
-    if (this.loading) {
-      this.loadingStrategy.handleLoading(this, ctx, canvasWidth, canvasHeight);
-      return;
-    }
+    try {
+      if (this.loading) {
+        this.loadingStrategy.handleLoading(
+          this,
+          ctx,
+          canvasWidth,
+          canvasHeight,
+        );
+        return;
+      }
 
-    if (this.error) {
-      this.errorHandlingStrategy.handleError(
-        this,
-        ctx,
-        canvasWidth,
-        canvasHeight,
-        this.error,
-      );
-      return;
-    }
+      if (this.error) {
+        this.errorHandlingStrategy.handleError(
+          this,
+          ctx,
+          canvasWidth,
+          canvasHeight,
+          this.error,
+        );
+        return;
+      }
 
-    if (this.image) {
-      // Delegate rendering to the render strategy
-      await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+      if (this.image) {
+        // Delegate rendering to the render strategy
+        await this.renderStrategy.render(this, ctx, canvasWidth, canvasHeight);
+      }
+    } catch (error) {
+      ErrorHandler.handle(error as Error);
     }
   }
 

@@ -21,6 +21,11 @@ import {
   IStateManagementStrategy,
 } from "../types/_strategies";
 
+import {
+  ContentError,
+  ContentValidationError,
+} from "../core/errors/ContentErrors";
+
 // Default implementation for IContentValidation
 export class DefaultContentValidation implements IContentValidation {
   validate(data: ContentData, rules: ValidationRules, context?: any): boolean {
@@ -32,9 +37,11 @@ export class DefaultContentValidation implements IContentValidation {
       if (typeof ruleValue === "function") {
         const result = ruleValue(dataValue, context);
         if (typeof result === "string") {
-          throw new ValidationError(result);
+          throw new ContentValidationError(result);
         } else if (!result) {
-          throw new ValidationError(`Field ${key} failed custom validation`);
+          throw new ContentValidationError(
+            `Field ${key} failed custom validation`,
+          );
         }
       } else {
         switch (key) {
@@ -45,19 +52,19 @@ export class DefaultContentValidation implements IContentValidation {
                 dataValue === null ||
                 dataValue === "")
             ) {
-              throw new ValidationError(`Field ${key} is required`);
+              throw new ContentValidationError(`Field ${key} is required`);
             }
             break;
           case "minLength":
             if (typeof dataValue === "string" && dataValue.length < ruleValue) {
-              throw new ValidationError(
+              throw new ContentValidationError(
                 `Field ${key} must be at least ${ruleValue} characters long`,
               );
             }
             break;
           case "maxLength":
             if (typeof dataValue === "string" && dataValue.length > ruleValue) {
-              throw new ValidationError(
+              throw new ContentValidationError(
                 `Field ${key} must be no more than ${ruleValue} characters long`,
               );
             }
@@ -67,7 +74,7 @@ export class DefaultContentValidation implements IContentValidation {
               typeof dataValue === "string" &&
               !(ruleValue as RegExp).test(dataValue)
             ) {
-              throw new ValidationError(
+              throw new ContentValidationError(
                 `Field ${key} does not match the pattern`,
               );
             }
@@ -211,7 +218,21 @@ export class ContentFactory implements IContentElementFactory {
     if (options.validate) {
       const rules = options.validationRules?.[data.type];
       if (rules) {
-        this.validator.validate(data, rules);
+        try {
+          this.validator.validate(data, rules);
+        } catch (error) {
+          if (error instanceof ContentError) {
+            throw new ContentValidationError(
+              `Validation failed for ${data.type} element: ${error.message}`,
+              {
+                data,
+                rules,
+                originalError: error,
+              },
+            );
+          }
+          throw error;
+        }
       }
     }
 
