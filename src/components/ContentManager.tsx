@@ -8,6 +8,7 @@ import { ContentFactory } from "./ContentFactory";
 import { StrategyProvider } from "@/core/di/StrategyProvider";
 import { DIContainer } from "@/core/di/Container";
 import { DI_TOKENS } from "@/core/di/tokens";
+import { ContentStateManager } from "@/core/state/ContentStateManager";
 
 interface ContentManagerProps {
   contentFactory?: IContentFactory;
@@ -29,6 +30,26 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
 }) => {
   const [contentElements, setContentElements] = useState<ContentElement[]>([]);
   const contentDataRef = useRef<ContentData[]>([]);
+
+  // Subscribe to changes in content elements
+  useEffect(() => {
+    const subscriptions = contentElements.map((element) => {
+      if ("stateManager" in element) {
+        return (element.stateManager as ContentStateManager).subscribe(
+          (state) => {
+            // Handle state changes here, e.g., re-render
+            console.log(`State updated for element ${element.id}:`, state);
+            setContentElements((prev) => [...prev]);
+          },
+        );
+      }
+      return () => {};
+    });
+
+    return () => {
+      subscriptions.forEach((unsubscribe) => unsubscribe());
+    };
+  }, [contentElements]);
 
   // Khởi tạo các ContentElement từ initialContent
   useEffect(() => {
@@ -55,18 +76,20 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
         prev.map((element) => {
           if (element.id === id) {
             element.update(data);
-            // Update corresponding data in contentDataRef
-            const updatedData = element.getData();
-            contentDataRef.current = contentDataRef.current.map((d) =>
-              d.id === id ? updatedData : d,
-            );
           }
           return element;
         }),
       );
-      onChange?.(contentDataRef.current);
+      onChange?.(
+        contentElements.map((el) => {
+          const data = el.getData();
+          return {
+            ...data,
+          };
+        }),
+      );
     },
-    [onChange],
+    [onChange, contentElements],
   );
 
   const removeContent = useCallback(

@@ -25,6 +25,7 @@ import {
   ContentError,
   ContentValidationError,
 } from "../core/errors/ContentErrors";
+import { ContentStateManager } from "../core/state/ContentStateManager";
 
 // Default implementation for IContentValidation
 export class DefaultContentValidation implements IContentValidation {
@@ -253,29 +254,32 @@ export class ContentFactory implements IContentElementFactory {
       );
 
     if (data.type === ContentType.IMAGE) {
-      return new ImageElement(
+      const element = new ImageElement(
         data,
         renderStrategy,
         loadingStrategy,
         errorHandlingStrategy,
         stateManagementStrategy,
       );
+      return element;
     } else if (data.type === ContentType.TEXT) {
-      return new TextElement(
+      const element = new TextElement(
         data,
         renderStrategy,
         loadingStrategy,
         errorHandlingStrategy,
         stateManagementStrategy,
       );
+      return element;
     } else if (data.type === ContentType.QRCODE) {
-      return new QRCodeElement(
+      const element = new QRCodeElement(
         data,
         renderStrategy,
         loadingStrategy,
         errorHandlingStrategy,
         stateManagementStrategy,
       );
+      return element;
     } else {
       throw new Error(`Unsupported content type: ${data.type}`);
     }

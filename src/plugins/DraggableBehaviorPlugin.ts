@@ -8,6 +8,7 @@ import {
   BehaviorPluginType,
 } from "../types";
 import { ErrorHandler } from "../core/errors/ErrorHandler";
+import { ContentStateManager } from "../core/state/ContentStateManager";
 
 interface DragState {
   dragging: boolean;
@@ -81,7 +82,6 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
       });
     }
   };
-
   private onMouseMove = (element: ContentElement) => (event: MouseEvent) => {
     const state = this.dragState.get(element.id);
     if (state?.dragging) {
@@ -93,10 +93,14 @@ export class DraggableBehaviorPlugin implements IBehaviorPlugin {
 
       const newX = event.clientX - rect.left - state.startX;
       const newY = event.clientY - rect.top - state.startY;
-      element.update({ x: newX, y: newY });
+      if ("stateManager" in element) {
+        (element.stateManager as ContentStateManager).updateData({
+          x: newX,
+          y: newY,
+        });
+      }
     }
   };
-
   private onMouseUp = (element: ContentElement) => () => {
     this.dragState.set(element.id, {
       ...this.dragState.get(element.id),

@@ -11,6 +11,7 @@ import {
   StaticQRCodeGenerator,
 } from "./QRCodeStrategies";
 import { ContentRenderError } from "../core/errors/ContentErrors";
+import { ContentStateManager } from "../core/state/ContentStateManager";
 
 /**
  * Default implementation for IRenderStrategy.
@@ -143,6 +144,9 @@ export class DefaultLoadingStrategy implements ILoadingStrategy {
     canvasWidth: number,
     canvasHeight: number,
   ): void {
+    if ("stateManager" in element) {
+      (element.stateManager as ContentStateManager).setLoading(true);
+    }
     // Draw a simple loading indicator
     ctx.save();
     ctx.fillStyle = "lightgray";
@@ -168,6 +172,9 @@ export class DefaultErrorHandlingStrategy implements IErrorHandlingStrategy {
     canvasHeight: number,
     error: string,
   ): void {
+    if ("stateManager" in element) {
+      (element.stateManager as ContentStateManager).setError(error);
+    }
     // Draw a simple error indicator
     ctx.save();
     ctx.fillStyle = "red";
@@ -186,10 +193,15 @@ export class DefaultStateManagementStrategy
   implements IStateManagementStrategy
 {
   getState(element: ContentElement): any {
-    return element.getData();
+    if ("stateManager" in element) {
+      return (element.stateManager as ContentStateManager).getState().data;
+    }
+    return {};
   }
 
   setState(element: ContentElement, data: Partial<ContentData>): void {
-    element.update(data);
+    if ("stateManager" in element) {
+      (element.stateManager as ContentStateManager).updateData(data);
+    }
   }
 }

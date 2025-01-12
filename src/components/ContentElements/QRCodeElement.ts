@@ -18,6 +18,7 @@ import {
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
+import { ContentStateManager } from "@/core/state/ContentStateManager";
 
 export class QRCodeElement implements ContentElement {
   readonly id: string;
@@ -30,6 +31,7 @@ export class QRCodeElement implements ContentElement {
   private loadingStrategy: ILoadingStrategy;
   private errorHandlingStrategy: IErrorHandlingStrategy;
   private stateManagementStrategy: IStateManagementStrategy;
+  private stateManager: ContentStateManager;
 
   constructor(
     data: ContentData,
@@ -45,6 +47,11 @@ export class QRCodeElement implements ContentElement {
     this.errorHandlingStrategy = errorHandlingStrategy;
     this.stateManagementStrategy = stateManagementStrategy;
     this.generateQRCode();
+    this.stateManager = new ContentStateManager({
+      isLoading: false,
+      error: null,
+      data: data,
+    });
   }
 
   private async generateQRCode() {
@@ -110,16 +117,17 @@ export class QRCodeElement implements ContentElement {
   }
 
   update(data: Partial<ContentData>): void {
-    this.stateManagementStrategy.setState(this, data);
+    this.stateManager.updateData(data);
+    const newData = this.stateManager.getState().data;
     if (
-      (data.link && data.link !== this.data.link) ||
-      (data.src && data.src !== this.data.src)
+      (data.link && data.link !== newData.link) ||
+      (data.src && data.src !== newData.src)
     ) {
       this.generateQRCode();
     }
   }
 
   getData(): ContentData {
-    return this.stateManagementStrategy.getState(this);
+    return this.stateManager.getState().data;
   }
 }

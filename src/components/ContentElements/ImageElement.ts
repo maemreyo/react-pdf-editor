@@ -14,6 +14,7 @@ import {
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
+import { ContentStateManager } from "@/core/state/ContentStateManager";
 
 export class ImageElement implements ContentElement {
   readonly id: string;
@@ -26,6 +27,7 @@ export class ImageElement implements ContentElement {
   private loadingStrategy: ILoadingStrategy;
   private errorHandlingStrategy: IErrorHandlingStrategy;
   private stateManagementStrategy: IStateManagementStrategy;
+  private stateManager: ContentStateManager;
 
   constructor(
     data: ContentData,
@@ -41,6 +43,12 @@ export class ImageElement implements ContentElement {
     this.errorHandlingStrategy = errorHandlingStrategy;
     this.stateManagementStrategy = stateManagementStrategy;
     this.loadImage();
+
+    this.stateManager = new ContentStateManager({
+      isLoading: false,
+      error: null,
+      data: data,
+    });
   }
 
   private async loadImage() {
@@ -111,13 +119,14 @@ export class ImageElement implements ContentElement {
   }
 
   update(data: Partial<ContentData>): void {
-    this.stateManagementStrategy.setState(this, data);
-    if (data.src && data.src !== this.data.src) {
+    this.stateManager.updateData(data);
+    const newData = this.stateManager.getState().data;
+    if (data.src && data.src !== newData.src) {
       this.loadImage();
     }
   }
 
   getData(): ContentData {
-    return this.stateManagementStrategy.getState(this);
+    return this.stateManager.getState().data;
   }
 }

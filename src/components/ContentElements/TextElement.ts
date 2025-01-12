@@ -13,6 +13,7 @@ import {
 } from "../../strategies/DefaultStrategies";
 import { ContentType } from "@/types";
 import { ErrorHandler } from "../../core/errors/ErrorHandler";
+import { ContentStateManager } from "@/core/state/ContentStateManager";
 
 export class TextElement implements ContentElement {
   readonly id: string;
@@ -22,6 +23,7 @@ export class TextElement implements ContentElement {
   private loadingStrategy: ILoadingStrategy;
   private errorHandlingStrategy: IErrorHandlingStrategy;
   private stateManagementStrategy: IStateManagementStrategy;
+  private stateManager: ContentStateManager;
 
   constructor(
     data: ContentData,
@@ -36,6 +38,12 @@ export class TextElement implements ContentElement {
     this.loadingStrategy = loadingStrategy;
     this.errorHandlingStrategy = errorHandlingStrategy;
     this.stateManagementStrategy = stateManagementStrategy;
+
+    this.stateManager = new ContentStateManager({
+      isLoading: false,
+      error: null,
+      data: data,
+    });
   }
 
   async render(
@@ -52,10 +60,10 @@ export class TextElement implements ContentElement {
   }
 
   update(data: Partial<ContentData>): void {
-    this.stateManagementStrategy.setState(this, data);
+    this.stateManager.updateData(data);
   }
 
   getData(): ContentData {
-    return this.stateManagementStrategy.getState(this);
+    return this.stateManager.getState().data;
   }
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { ErrorBoundary as ReactErrorBoundary } from "react-error-boundary";
 
-export const ErrorBoundary: React.FC<{
+const ErrorBoundary: React.FC<{
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }> = ({ children, fallback }) => {
@@ -17,3 +17,5 @@ export const ErrorBoundary: React.FC<{
     </ReactErrorBoundary>
   );
 };
+
+export default ErrorBoundary;
