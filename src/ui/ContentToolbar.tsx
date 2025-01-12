@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ContentData } from "../types/_content";
 
 interface ContentToolbarProps {
-  contentManagerRef: React.RefObject<HTMLDivElement>;
+  contentManagerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export const ContentToolbar: React.FC<ContentToolbarProps> = ({
@@ -14,7 +14,7 @@ export const ContentToolbar: React.FC<ContentToolbarProps> = ({
   >(null);
 
   const addContent = (data: ContentData) => {
-    if (contentManagerRef.current) {
+    if (contentManagerRef?.current) {
       const addContentFunc = contentManagerRef.current.dataset.addContent;
       if (addContentFunc) {
         // @ts-ignore

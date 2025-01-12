@@ -49,7 +49,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
   // Memoize complex objects and functions
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const contentManagerRef = useRef<HTMLDivElement>(null);
+  const contentManagerRef = useRef<HTMLDivElement | null>(null);
   // Add content data state
   const [contentData, setContentData] = useState<ContentData[]>([]);
 
@@ -273,7 +273,7 @@ const PDFViewer: React.FC<PDFViewerProps> = (props) => {
                   handleCanvasRender();
                   const canvas = containerRef.current?.querySelector("canvas");
                   const ctx = canvas?.getContext("2d");
-                  if (ctx) {
+                  if (ctx && canvas) {
                     renderContent(ctx, canvas.width, canvas.height);
                   }
                 }}
